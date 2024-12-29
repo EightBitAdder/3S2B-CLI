@@ -1,9 +1,3 @@
-# I don't like this...
-# I know this is why we have the __init__.py files,
-# but I'm lazy, so sue me XD.
-import sys
-sys.path.insert(1, "src")
-
 from src.fragmentor import Fragmentor
 import sqlite3
 from rdkit import Chem, RDLogger
