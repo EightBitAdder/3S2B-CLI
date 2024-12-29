@@ -20,9 +20,9 @@ To start using the tool, simply follow the steps listed below:
 
 ### Step 2: Use the Tool
 Run the main.py script in order to start using the tool.
-    ```bash
-    python main.py
-    ```
+```bash
+python main.py
+```
 
 ## Additional Notes
 
