@@ -23,91 +23,52 @@ def isHeader(row: pd.Series) -> bool:
     return row.apply(lambda x: isinstance(x, str)).all()
 
 
-def compare(msDataPath: str, massListPath: str) -> float:
-    
-    if (not os.path.exists(msDataPath) or not os.path.exists(massListPath)):
+def checkFile(filePath: str, *, expectedCols: int) -> pd.DataFrame:
 
-        raise FileNotFoundError(f"<!> Error in reading {msDataPath} and {massListPath}.")
+    if (not os.path.exists(filePath)):
+
+        raise FileNotFoundError(f"<!> Error in reading {filePath}.")
     
-    if (not (msDataPath.endswith(".csv") or msDataPath.endswith(".txt")) or not (massListPath.endswith(".csv") or massListPath.endswith(".txt"))):
+    if (not (filePath.endswith(".csv") or filePath.endswith(".txt"))):
 
         raise ValueError(f"<!> Error in reading non-.csv or -.txt files.")
     
     # TODO:
     # Write helper method for programmatically determining sep
-    tempMSData = pd.read_csv(msDataPath, header=None, sep=" ")
+    tempDF = pd.read_csv(filePath, header=None, sep=" ")
 
-    if (isHeader(tempMSData.iloc[0])):
+    if (isHeader(tempDF.iloc[0])):
         
-        msData = tempMSData[1:]
+        df = tempDF[1:]
 
     else:
 
-        msData = tempMSData
+        df = tempDF
 
-    if (msData.shape[1] != 2):
+    if (df.shape[1] != expectedCols):
 
-        print(msData)
+        print(df)
 
-        raise ValueError(f"<!> Error in parsing {msDataPath}.")
+        raise ValueError(f"<!> Error in parsing {filePath}.")
     
-    if (not np.issubdtype(msData.values.dtype, np.number)):
+    if (not np.issubdtype(df.values.dtype, np.number)):
 
-        raise ValueError(f"<!> Error in parsing {msDataPath}.")
+        raise ValueError(f"<!> Error in parsing {filePath}.")
     
-    tempMassList = pd.read_csv(massListPath, header=None)
+    return df
 
-    if (isHeader(tempMassList.iloc[0])):
 
-        massList = tempMassList[1:]
-
-    else:
-
-        massList = tempMassList
-
-    if (massList.shape[1] != 1):
-
-        raise ValueError(f"<!> Error in parsing {massListPath}.")
+def compare(msDataPath: str, massListPath: str) -> float:
     
-    if (not np.issubdtype(massList.values.dtype, np.number)):
-
-        raise ValueError(f"<!> Error in parsing {massListPath}.")
+    msData = checkFile(msDataPath, expectedCols=2)
+    massList = checkFile(massListPath, expectedCols=1)
     
     return FPIE(msData.to_numpy(), massList.to_numpy(), plotting=True)
 
 
 def compareAll(msDataPath: str) -> str:
 
-    if (not os.path.exists(msDataPath)):
-
-        raise FileNotFoundError(f"<!> Error in reading {msDataPath}.")
-    
-    if (not (msDataPath.endswith(".csv") or msDataPath.endswith(".txt"))):
-
-        raise ValueError(f"<!> Error in reading non-.csv or -.txt files.")
-    
-    # TODO:
-    # Write helper method for programmatically determining sep
-    tempMSData = pd.read_csv(msDataPath, header=None, sep=" ")
-
-    if (isHeader(tempMSData.iloc[0])):
-
-        msData = tempMSData[1:]
-
-    else:
-
-        msData = tempMSData
-
-    if (msData.shape[1] != 2):
-
-        print(msData)
-
-        raise ValueError(f"<!> Error in parsing {msDataPath}.")
-    
-    if (not np.issubdtype(msData.values.dtype, np.number)):
-
-        raise ValueError(f"<!> Error in parsing {msDataPath}.")
-    
+    msData          = checkFile(msDataPath, expectedCols=2)
     FPIEs           = []
     idxTableDF      = viewIdxTable()
     craftsLabEntrys = idxTableDF.iloc[:, 1]
