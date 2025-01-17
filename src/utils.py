@@ -12,6 +12,7 @@ def fetchMassList(allFragsDF: pd.DataFrame) -> np.ndarray:
     for row in allFragsDF.itertuples():
 
         Iso_Wts = list(map(float, row.Iso_Wts.split(", ")))
+
         massList.extend([row.Exact_Mol_Wt, *Iso_Wts])
 
     return np.array(massList)
@@ -39,6 +40,7 @@ def compare(msDataPath: str, massListPath: str) -> float:
     if (isHeader(tempMSData.iloc[0])):
         
         msData = tempMSData[1:]
+
     else:
 
         msData = tempMSData
@@ -58,6 +60,7 @@ def compare(msDataPath: str, massListPath: str) -> float:
     if (isHeader(tempMassList.iloc[0])):
 
         massList = tempMassList[1:]
+
     else:
 
         massList = tempMassList
@@ -90,6 +93,7 @@ def compareAll(msDataPath: str) -> str:
     if (isHeader(tempMSData.iloc[0])):
 
         msData = tempMSData[1:]
+
     else:
 
         msData = tempMSData
@@ -104,9 +108,8 @@ def compareAll(msDataPath: str) -> str:
 
         raise ValueError(f"<!> Error in parsing {msDataPath}.")
     
-    FPIEs = []
-    
-    idxTableDF = viewIdxTable()
+    FPIEs           = []
+    idxTableDF      = viewIdxTable()
     craftsLabEntrys = idxTableDF.iloc[:, 1]
 
     for entry in craftsLabEntrys:
@@ -127,7 +130,6 @@ def FPIE(msData: np.ndarray, massList: np.ndarray, *, tol: float=0, plotting: bo
 
     msDataMasses = np.unique(msData[:, 0])
     massList = np.unique(massList)
-
     commonMasses = []
 
     for msDataMass in msDataMasses:
@@ -137,6 +139,7 @@ def FPIE(msData: np.ndarray, massList: np.ndarray, *, tol: float=0, plotting: bo
             if (m + tol < msDataMass):
 
                 continue
+
             elif(m - tol >= msDataMass):
 
                 commonMasses.append(msDataMass)
@@ -150,7 +153,7 @@ def FPIE(msData: np.ndarray, massList: np.ndarray, *, tol: float=0, plotting: bo
             explainedIntensities.append(row[1])
 
     msDataIntensities = msData[:, 1]
-    FPIEScore = float(sum(explainedIntensities) / np.sum(msDataIntensities))
+    FPIEScore         = float(sum(explainedIntensities) / np.sum(msDataIntensities))
 
     if (plotting):
 

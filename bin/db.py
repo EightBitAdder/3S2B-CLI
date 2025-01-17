@@ -9,7 +9,7 @@ SWGDRUG313_PATH = "resource/SWGDRUG313.SDF"
 
 def makeDB() -> None:
 
-    conn = sqlite3.connect(DB_PATH)
+    conn   = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -40,12 +40,10 @@ def makeDB() -> None:
             continue
         
         
-        smiles = Chem.MolToSmiles(mol)
-
-        fragmentor = Fragmentor()
+        smiles         = Chem.MolToSmiles(mol)
+        fragmentor     = Fragmentor()
         fragmentor.mol = mol
-        
-        allFragsDF = fragmentor.fetchAllFragsData()
+        allFragsDF     = fragmentor.fetchAllFragsData()
         
         cursor.execute("INSERT OR IGNORE INTO idxTable (SMILES) VALUES (?)",
                        (smiles,))

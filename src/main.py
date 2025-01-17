@@ -7,6 +7,7 @@ from menu.menu import Menu
 def main():
     
     menu = Menu("CRAFTS Lab MFMC Menu")
+    
     menu.addMenuItem("V", "View Index Table", ViewIdxTableHandler(viewIdxTable))
     menu.addMenuItem("F", "Search and Fetch", SearchAndFetchHandler(searchAndFetch))
     menu.addMenuItem("D", "Download", DownloadHandler(download))

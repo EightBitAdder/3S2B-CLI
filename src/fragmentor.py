@@ -86,8 +86,8 @@ class Fragmentor():
         singleBondIdxs = [bond.GetIdx()
                           for bond in self.mol.GetBonds()
                           if (bond.GetBondType() == Chem.BondType.SINGLE)]
-        bondIdxs = chain(*[combinations(singleBondIdxs, mult)
-                          for mult in range(1, self.maxMult + 1)])
+        bondIdxs       = chain(*[combinations(singleBondIdxs, mult)
+                                for mult in range(1, self.maxMult + 1)])
 
         return bondIdxs
     
@@ -114,8 +114,9 @@ class Fragmentor():
 
         for bondIdx in self._fetchBondIdxs():
 
-            frags = Chem.FragmentOnBonds(self.mol, [*bondIdx])
+            frags    = Chem.FragmentOnBonds(self.mol, [*bondIdx])
             fragMols = Chem.GetMolFrags(frags, asMols=True)
+
             fragsWithMult.extend([(fragMol, len(bondIdx))
                                   for fragMol in fragMols])
 
@@ -204,11 +205,13 @@ class Fragmentor():
         """
 
         isoMasses = []
-        sp = iso.IsoTotalProb(formula=self._cleanMolFormula(mol),
-                              prob_to_cover=0.9999)
+        sp        = iso.IsoTotalProb(formula=self._cleanMolFormula(mol),
+                                     prob_to_cover=0.9999)
 
         for mass, prob in sp:
+
             if (prob > 0.01):
+
                 isoMasses.append(mass)
 
         return isoMasses
@@ -246,13 +249,13 @@ class Fragmentor():
                  for frag in self.fetchAllFrags()
             ]
         ]
-
-        allFragsDF = pd.DataFrame(allFragsData,
-                                  columns=["SMILES",
-                                          "Formula",
-                                          "Exact_Mol_Wt",
-                                          "Iso_Wts",
-                                          "Mult"])
+        allFragsDF   = pd.DataFrame(allFragsData,
+                                    columns=["SMILES",
+                                            "Formula",
+                                            "Exact_Mol_Wt",
+                                            "Iso_Wts",
+                                            "Mult"])
+        
         allFragsDF.drop_duplicates(inplace=True)
 
         return allFragsDF

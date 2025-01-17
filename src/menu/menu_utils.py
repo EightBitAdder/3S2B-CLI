@@ -16,13 +16,17 @@ def dfToPrettyTable(df: pd.DataFrame, header: bool=True, colWidth: int=50):
     table = PrettyTable()
 
     if (header):
+
         table.field_names = df.columns.tolist()
+
     else:
+
         table.header=False
 
     table.junction_char = "-"
 
     for row in df.itertuples(index=False):
+
         wrappedRow = [
             textwrap.fill(str(cell), width=colWidth) for cell in row
         ]
@@ -30,6 +34,7 @@ def dfToPrettyTable(df: pd.DataFrame, header: bool=True, colWidth: int=50):
         table.add_row(wrappedRow)
 
     for col in table.field_names:
+
         table.align[col] = "l"
 
     table.hrules = True
@@ -53,7 +58,7 @@ def paginateDF(df: pd.DataFrame, preamble: str | PrettyTable=None, minRows: int=
     while True:
 
         start = numPage * minRows
-        end = start + minRows
+        end   = start + minRows
 
         if (start >= numRows):
 
@@ -62,7 +67,7 @@ def paginateDF(df: pd.DataFrame, preamble: str | PrettyTable=None, minRows: int=
             break
 
         currPage = df.iloc[start:end]
-        table = dfToPrettyTable(currPage, colWidth=colWidth)
+        table    = dfToPrettyTable(currPage, colWidth=colWidth)
 
         clearConsole()
 
@@ -74,8 +79,7 @@ def paginateDF(df: pd.DataFrame, preamble: str | PrettyTable=None, minRows: int=
 
             elif (isinstance(preamble, str)):
 
-                print(dfToPrettyTable(pd.DataFrame({"": [preamble]}), header=False),
-                      "\n")
+                print(dfToPrettyTable(pd.DataFrame({"": [preamble]}), header=False), "\n")
 
         else:
 
@@ -93,6 +97,7 @@ def paginateDF(df: pd.DataFrame, preamble: str | PrettyTable=None, minRows: int=
                 if (end < numRows):
 
                     numPage += 1
+
                 else:
 
                     print("<!> Page does not exist.")
@@ -127,7 +132,7 @@ class CompareAllHandler(Handler):
 
     def handle(self, *args) -> None:
 
-        result = compareAll(*args)
+        result   = compareAll(*args)
         maxFPIEs = result[result["FPIE"] == result["FPIE"].max()]
 
         paginateDF(maxFPIEs, "SWGDRUG Mols. w/ Max. FPIE:")
@@ -143,9 +148,11 @@ class DownloadHandler(Handler):
             print("Donwloading {}...".format(*args))
 
             result = download(*args)
+
         except:
 
             print("<!> Error in downloading {}.".format(*args))
+
         else:
 
             print("<*> Download complete.")
@@ -155,10 +162,9 @@ class SearchAndFetchHandler(Handler):
 
     def handle(self, *args) -> None:
 
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-
-        result = searchAndFetch(*args)
+        conn    = sqlite3.connect(DB_PATH)
+        cursor  = conn.cursor()
+        result  = searchAndFetch(*args)
         titleDF = pd.read_sql(f"SELECT * FROM idxTable WHERE craftsLabEntry = ?",
                               conn,
                               params=(*args,))

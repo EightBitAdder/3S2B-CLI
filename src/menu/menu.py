@@ -26,7 +26,7 @@ class MenuItem():
 
     def __init__(self, alias: str, handler: Handler) -> None:
 
-        self.alias = alias
+        self.alias   = alias
         self.handler = handler
     
 
@@ -34,8 +34,9 @@ class Menu():
 
     def __init__(self, title: str="") -> None:
 
-        self._title = title
+        self._title     = title
         self._menuItems = {}
+
         self._addQuit()
 
 
@@ -58,7 +59,7 @@ class Menu():
         
         if key in self._menuItems:
 
-            menuItem = self._menuItems[key]
+            menuItem  = self._menuItems[key]
             signature = inspect.signature(menuItem.handler.func)
 
             if (bool(signature.parameters)):
@@ -70,9 +71,11 @@ class Menu():
                 self._clear()
                 
                 menuItem.handler.handle(*args)
+
             else:
 
                 menuItem.handler.handle()
+
         else:
 
             print("<!> Invalid choice. Please try again.")
@@ -92,6 +95,7 @@ class Menu():
             try:
 
                 self._choose(choice)
+
             except Exception as e:
 
                 print(f"<!> Uh oh! There was an error:\n{e}")
@@ -108,15 +112,16 @@ class Menu():
         
         if (self._title != ""):
 
-            titleTable = PrettyTable()
-            titleTable.header = False
+            titleTable               = PrettyTable()
+            titleTable.header        = False
             titleTable.junction_char = "-"
+
             titleTable.add_row([self._title])
 
             print(titleTable, "\n")
         
-        menuTable = PrettyTable()
-        menuTable.header = False
+        menuTable               = PrettyTable()
+        menuTable.header        = False
         menuTable.junction_char = "-"
 
         for key, menuItem in self._menuItems.items():
