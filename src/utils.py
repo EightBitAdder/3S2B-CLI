@@ -97,11 +97,7 @@ def FPIE(msData: np.ndarray, massList: np.ndarray, *, tol: float=0, plotting: bo
 
         for m in massList:
 
-            if (m + tol < msDataMass):
-
-                continue
-
-            elif(m - tol >= msDataMass):
+            if (m - tol <= msDataMass <= m + tol):
 
                 commonMasses.append(msDataMass)
 
