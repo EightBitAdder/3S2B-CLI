@@ -58,15 +58,15 @@ def checkFile(filePath: str, *, expectedCols: int) -> pd.DataFrame:
     return df
 
 
-def compare(msDataPath: str, massListPath: str) -> float:
+def compare(msDataPath: str, massListPath: str, tol: float) -> float:
     
     msData = checkFile(msDataPath, expectedCols=2)
     massList = checkFile(massListPath, expectedCols=1)
     
-    return FPIE(msData.to_numpy(), massList.to_numpy(), plotting=True)
+    return FPIE(msData.to_numpy(), massList.to_numpy(), tol=tol, plotting=True)
 
 
-def compareAll(msDataPath: str) -> str:
+def compareAll(msDataPath: str, tol: float) -> str:
 
     msData          = checkFile(msDataPath, expectedCols=2)
     FPIEs           = []
@@ -77,19 +77,25 @@ def compareAll(msDataPath: str) -> str:
 
         massList = fetchMassList(searchAndFetch(entry))
 
-        FPIEs.append(FPIE(msData.to_numpy(), massList))
+        FPIEs.append(FPIE(msData.to_numpy(), massList, tol=tol))
 
     return pd.concat([idxTableDF.iloc[:, 0], pd.DataFrame({"FPIE": FPIEs})],
                      axis=1)
 
 
-def FPIE(msData: np.ndarray, massList: np.ndarray, *, tol: float=0, plotting: bool=False) -> float:
+def FPIE(msData: np.ndarray, massList: np.ndarray, *, tol: float, plotting: bool=False) -> float:
+
+    msDataMasses = np.unique(msData[:, 0])
 
     if (tol == 0):
 
         massList = massList.astype(int)
 
-    msDataMasses = np.unique(msData[:, 0])
+    else:
+
+        massList = np.round(massList, 5)
+        msDataMasses = np.round(msDataMasses, 5)
+
     massList = np.unique(massList)
     commonMasses = []
 

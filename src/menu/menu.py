@@ -66,7 +66,7 @@ class Menu():
 
                 # TODO:
                 # Obviously this is awfuly precarious...
-                args = input(f"Enter arg for <<< {menuItem.alias} >>>: ").split(":")
+                args = input(f"Enter arg for <<< {menuItem.alias} >>>: ").split()
 
                 self._clear()
                 

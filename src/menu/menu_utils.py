@@ -125,12 +125,22 @@ class CompareHandler(Handler):
 
     def handle(self, *args) -> None:
 
+        *filePaths, tol = args
+        tol             = float(tol)
+
+        args = (*filePaths, tol)
+
         print(dfToPrettyTable(pd.DataFrame({"FPIE": [compare(*args)]})))
 
 
 class CompareAllHandler(Handler):
 
     def handle(self, *args) -> None:
+
+        msDataPath, tol = args
+        tol              = float(tol)
+
+        args = (msDataPath, tol)
 
         result   = compareAll(*args)
         maxFPIEs = result[result["FPIE"] == result["FPIE"].max()]
