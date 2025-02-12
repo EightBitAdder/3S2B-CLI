@@ -66,7 +66,7 @@ def compare(msDataPath: str, massListPath: str, tol: float) -> float:
     return FPIE(msData.to_numpy(), massList.to_numpy(), tol=tol, plotting=True)
 
 
-def compareAll(msDataPath: str, tol: float) -> str:
+def compareAll(msDataPath: str, tol: float) -> pd.DataFrame:
 
     msData          = checkFile(msDataPath, expectedCols=2)
     FPIEs           = []

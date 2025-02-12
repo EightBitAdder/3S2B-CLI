@@ -26,15 +26,6 @@ def parseSearchTerm(searchTerm: str) -> str:
     return craftsLabsEntry
 
 
-def download(searchTerm: str) -> None:
-
-    allFragsDF    = searchAndFetch(searchTerm)
-    downloadsPath = os.path.join(os.path.expanduser("~"), "Downloads")
-    fullPath      = os.path.join(downloadsPath, f"{parseSearchTerm(searchTerm)}.csv")
-
-    allFragsDF.to_csv(fullPath, index=False)
-
-
 def searchAndFetch(searchTerm: str) -> pd.DataFrame:
 
     conn           = sqlite3.connect(DB_PATH)
