@@ -2,7 +2,11 @@ from src.fragmentor import Fragmentor
 import os
 import sqlite3
 from rdkit import Chem
+from rdkit import RDLogger
 from tqdm import tqdm
+
+
+RDLogger.DisableLog('rdApp.*')
 
 
 CURRENT_DIR     = os.path.dirname(os.path.abspath(__file__))
@@ -47,13 +51,42 @@ def makeDB() -> None:
         fragmentor     = Fragmentor()
         fragmentor.mol = mol
         allFragsDF     = fragmentor.fetchAllFragsData()
+
+        cursor.execute("SELECT craftsLabEntry FROM idxTable WHERE SMILES = ?", (smiles,))
+
+        row = cursor.fetchone()
+
+        if (row):
+
+            craftsLabEntry = row[0]
+
+        else:
+
+            cursor.execute("INSERT INTO idxTable (SMILES) VALUES (?)", (smiles,))
+            conn.commit()
+            cursor.execute("SELECT craftsLabEntry FROM idxTable WHERE SMILES = ?", (smiles,))
+
+            craftsLabEntry = cursor.fetchone()[0]
         
-        cursor.execute("INSERT OR IGNORE INTO idxTable (SMILES) VALUES (?)",
-                       (smiles,))
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name = ?", (craftsLabEntry,))
         
-        if (cursor.rowcount > 0):
+        if (cursor.fetchone() is None):
+
+            if (not allFragsDF.empty):
+
+                try:
             
-            allFragsDF.to_sql(f"CL{cursor.lastrowid}", conn, index=False)
+                    allFragsDF.to_sql(craftsLabEntry, conn, index=False)
+
+                    tqdm.write(f"<*> Created fragment table: {craftsLabEntry}.")
+
+                except Exception as e:
+
+                    tqdm.write(f"<*> Failed to create fragment table: {craftsLabEntry} >>> {e}")
+
+            else:
+
+                tqdm.write(f"<*> Skipped empty fragment table: {craftsLabEntry}.")
 
     conn.commit()
     cursor.close()

@@ -1,6 +1,6 @@
 from fragmentor import Fragmentor
 from utils import compare, compareAll
-from db_utils import searchAndFetch, viewIdxTable
+from db_utils import addEntryFromSmiles, searchAndFetch, viewIdxTable
 import os
 import sqlite3
 import click
@@ -162,8 +162,6 @@ def a(ms_data_path, tol):
 @click.command()
 @click.argument("search_term")
 def f(search_term):
-
-    conn    = sqlite3.connect(DB_PATH)
     
     try:
 
@@ -172,10 +170,6 @@ def f(search_term):
     except Exception as e:
 
         print(f"<*> {search_term} does not exist . . .")
-
-    finally:
-
-        conn.close()
 
 
 @click.command()
@@ -197,11 +191,19 @@ def fr(smiles):
     return ScrollableTable(fragmentor.fetchAllFragsData(), f"{smiles} Fragment Data").run()
 
 
+@click.command()
+@click.argument("smiles")
+def add(smiles):
+
+    addEntryFromSmiles(smiles)
+
+
 cli.add_command(i)
 cli.add_command(f)
 cli.add_command(c)
 cli.add_command(a)
 cli.add_command(fr)
+cli.add_command(add)
 
 
 if __name__ == "__main__":
