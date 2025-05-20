@@ -1,10 +1,13 @@
 from src.fragmentor import Fragmentor
+import os
 import sqlite3
-from rdkit import Chem, RDLogger
+from rdkit import Chem
+from tqdm import tqdm
 
 
-DB_PATH = "resource/swgdrugdb.db"
-SWGDRUG313_PATH = "resource/SWGDRUG313.SDF"
+CURRENT_DIR     = os.path.dirname(os.path.abspath(__file__))
+DB_PATH         = os.path.abspath(os.path.join(CURRENT_DIR, "..", "..", "resource", "swgdrugdb.db"))
+SWGDRUG313_PATH = os.path.abspath(os.path.join(CURRENT_DIR, "..", "..", "resource", "SWGDRUG313.SDF"))
 
 
 def makeDB() -> None:
@@ -33,7 +36,7 @@ def makeDB() -> None:
 
     suppl = Chem.SDMolSupplier(SWGDRUG313_PATH)
 
-    for mol in suppl:
+    for mol in tqdm(suppl, desc="Processing SDF . . ."):
 
         if (not mol):
 
@@ -56,6 +59,6 @@ def makeDB() -> None:
     cursor.close()
     conn.close()
 
+if __name__ == "__main__":
 
-RDLogger.DisableLog("rdApp.*") # rdkit warnings are really annoying!
-makeDB()
+    makeDB()

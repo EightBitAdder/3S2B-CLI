@@ -1,34 +1,44 @@
 @echo off
-if not "%ERRORLEVEL%"=="0" exit /b %ERRORLEVEL%
-
 cd /d "%~dp0"
+
+echo [INFO] Checking Python version . . .
 
 python --version | find "3.12.7" >nul
 if errorlevel 1 (
-    echo Python 3.12.7 is required.
+    echo.
+    echo [ERROR] Python 3.12.7 is required.
+    echo Please install the correct Python version before continuing.
     exit /b 1
 )
 
+echo.
 if not exist ".venv" (
-    echo Creating virtual environment with Python 3.12.7...
+    echo [INFO] Creating virtual environment with Python 3.12.7 . . .
     python -m venv .venv
 ) else (
-    echo Virtual environment already exists.
+    echo [INFO] Virtual environment already exists.
 )
 
-call .venv\Script\activate
+if exist ".venv\Scripts\activate.bat" (
+    call .venv\Scripts\activate.bat
+) else (
+    echo.
+    echo [ERROR] Failed to activate virtual environment.
+    exit /b 1
+)
 
-set PYTHONPATH=%cd%
-
-echo Upgrading pip...
+echo.
+echo [INFO] Upgrading pip . . .
 python -m pip install --upgrade pip
 
-echo Installing dependencies...
-pip install -r requirements.txt
+echo.
+echo [INFO] Installing project in editable mode . . .
+pip install -e .
 
-echo Creating the MFD...
-cd bin
-python -c "from db import makeDB; makeDB()"
-cd ..
+echo.
+echo [INFO] Creating the MFD . . .
+python -c "from db.make import makeDB; makeDB()"
 
-echo Setup complete!
+echo.
+echo [SUCCESS] Setup complete!
+pause

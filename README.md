@@ -25,24 +25,24 @@ To start using the tool, simply follow the steps listed below:
     *(A .sh script for Linux and MacOS is actively being working on. Stay tuned...)*
 
 ### Step 2: Use the Tool
-Run the main.py script in order to start using the tool.
+Run the cli.bat script in order to start using the tool.
 ```bash
-python main.py
+cli.bat
 ```
 
 ## Using the Tool
 
-After running the main.py script, five menu options will be displayed to the console. They are as follows:
+After running the cli.bat script, five menu options will be displayed to the console. They are as follows:
 
-1. **View Index Table**: Pressing **V** (or **v**), followed by **enter** on your keyboard will display the MFD Index Table. This is the *master table* which pairs each of the SWGDrug molecules with their associated Fragment Table (*see below*).
+1. **View Index Table**: Pressing **i** (followed by **enter**) will display the MFD Index Table. This is the *master table* which pairs each of the SWGDrug molecules with their associated Fragment Table.
 
-2. **Search and Fetch**: Pressing **F** (or **f**), followed by **enter** on your keyboard will prompt the user to select an entry in the MFD Index Table to view. In particular, the user may select an entry either by *SMILES*; or, by *CRAFTS Lab Entry Number*. To select an entry by *CRAFTS Lab Entry Number*, simply type **CL** followed by the associated entry number in the MFD Index Table.
+2. **Search and Fetch**: Pressing **f**, followed an entry in the MFD Index Table (followed by **enter**) will display the Fragment Table of the corresponding entry. In particular, the user may select an entry either by *SMILES*; or, by *CRAFTS Lab Entry Number*. To select an entry by *CRAFTS Lab Entry Number*, simply type **CL** followed by the associated entry number in the MFD Index Table.
 
-3. **Download**: Pressing **D** (or **d**), followed by **enter** on your keyboard will prompt the user to select an entry in the MFD Index Table to download. In particular, the user may select an entry either by *SMILES*; or, by *CRAFTS Lab Entry Number*. To select an entry by *CRAFTS Lab Entry Number*, simply type **CL** followed by the associated entry number in the MDF Index Table.
+3. **Compare**: Pressing **c**, followed by two file paths, as well as a tolerance about which to calculate the FPIE score (followed by **enter**) will cause the two files to be compared against one another. Then the FPIE score together with a stem plot will be displayed. *Note*: The first file path must refer to a .csv or .txt file containing mass-spectral data (m/z and intensity observations), separated by a whitespace (*This is currently in the process of being updated to allow for arbitrary separator types. Stay tuned...*). The second file path must refer to a .csv or .txt file containing a list of masses.
 
-4. **Compare**: Pressing **C** (or **c**), followed by enter on your keyboard will prompt the user to enter in two file paths, separated by the following string: **" "**. The first file path must refer to a .csv or .txt file containing mass-spectral data (m/z and intensity observations), separated by a whitespace (*This is currently in the process of being updated to allow for arbitrary separator types. Stay tuned...*). The second file path must refer to a .csv or .txt file containing a list of masses. The user will also be prompted to enter a tolerance about which to calculate the FPIE score. Upon hitting enter, the two files will be compared against one another. Then an FPIE score together with a stem plot will be produced.
+4. **Compare All**: Pressing **a**, followed a file path, as well as a tolerance about which to calculate the FPIE scores (followed by **enter**) will cause the file to be compared against the entire MFD. Then a table containing all of the calculated FPIE scores will be displayed. *Note*: The file path must refer to a .csv or .txt file containing mass-spectral data (m/z and intensity observations), separated by a whitespace (*This is currently in the process of being updated to allow for arbitrary separator types. Stay tuned...*).
 
-5. **Compare All**: Pressing **A** (or **a**), followed by enter on your keyboard will prompt the user to enter in one file path. The file path must refer to a .csv or .txt file containing mass-spectral data (m/z and intensity observations), separated by a whitespace (*This is currently in the process of being updated to allow for arbitrary separator types. Stay tuned...*). The user will also be prompted to enter a tolerance about which to calculate the FPIE score. Upon hitting enter, the file will be compared against the entire MFD. Then a table containing all of the calculated FPIE scores will be produced.
+5. **Fragment**: Pressing **fr**, followed by a *SMILES* string (followed by **enter**) will display the Fragment Table of the associated *SMILES* string.
 
 ## Additional Notes
 
