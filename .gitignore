@@ -1,3 +1,5 @@
 resource/swgdrugdb.db
 src/3s2b.egg-info/
 src/3s2b.egg-info/
+src/__pycache__/
+src/db/__pycache__/
