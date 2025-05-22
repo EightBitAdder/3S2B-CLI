@@ -43,7 +43,7 @@ def checkFile(filePath: str, *, expectedCols: int | None=None, isMassList: bool=
 
     if (isHeader(tempDF.iloc[0])):
         
-        df = tempDF[1:]
+        df = tempDF[1:].copy()
 
     else:
 
@@ -55,6 +55,12 @@ def checkFile(filePath: str, *, expectedCols: int | None=None, isMassList: bool=
 
             raise ValueError(f"<!> Error parsing {filePath} as mass list.")
 
+        df[0] = pd.to_numeric(df[0], errors="raise")
+
+        if (df.shape[1] == 2):
+
+            df[1] = pd.to_numeric(df[1], errors="raise", downcast="integer")
+
     elif (expectedCols is not None):
 
         if (df.shape[1] != expectedCols):
@@ -62,7 +68,7 @@ def checkFile(filePath: str, *, expectedCols: int | None=None, isMassList: bool=
             print(df)
 
             raise ValueError(f"<!> Error in parsing {filePath}.")
-    
+
     if (not np.issubdtype(df.values.dtype, np.number)):
 
         raise ValueError(f"<!> Error in parsing {filePath}.")
@@ -95,7 +101,12 @@ def compareAll(msDataPath: str, *, tol: float) -> pd.DataFrame:
                      axis=1)
 
 
-def FPIE(msData: np.ndarray, massList: np.ndarray, *, tol: float, weighted: bool=False, plotting: bool=False) -> float:
+def FPIE(msData: np.ndarray,
+         massList: np.ndarray,
+         *,
+         tol: float,
+         weighted: bool=False,
+         plotting: bool=False) -> float:
     """
         <*> Reminder:
             tol must not be 0 if msData is high-res...
@@ -184,7 +195,7 @@ def FPIE(msData: np.ndarray, massList: np.ndarray, *, tol: float, weighted: bool
 
         ax.set_xlabel("m/z")
         ax.set_ylabel("Intensity")
-        ax.set_title("FPIE Annotated Plot")
+        ax.set_title(f"FPIE Annotated Plot")
 
         legendHandles = [
             Patch(color=multColorMap[mult], label=f"mult = {int(mult)}")

@@ -1,7 +1,8 @@
 from fragmentor import Fragmentor
-from utils import compare, compareAll
+from utils import fetchMassList, compare, compareAll
 from db_utils import addEntryFromSmiles, searchAndFetch, viewIdxTable
 import os
+import pandas as pd
 import sqlite3
 import click
 from textual.app import App
@@ -18,7 +19,8 @@ DB_PATH     = os.path.abspath(os.path.join(CURRENT_DIR, "..", "resource", "swgdr
 class ScrollableTable(App):
 
     BINDINGS = [("escape", "go_back", "Go Back"),
-                ("d", "download", "Download"),]
+                ("d", "download", "Download"),
+                ("m", "fetch_mass_list", "Fetch Mass List")]
 
 
     def __init__(self, df, title="", *, parent_df=None, parent_title=""):
@@ -72,12 +74,39 @@ class ScrollableTable(App):
     def action_download(self):
 
         downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
-        file_name      = "table.csv"
+        file_name      = f"{title}.csv"
         full_path      = os.path.join(downloads_path, file_name)
 
-        self.df.to_csv(full_path, index=False)
+        try:
 
-        self.notify(f"<*> Table saved to {full_path}.", severity="info")
+            self.df.to_csv(full_path, index=False, sep=" ")
+            self.notify(f"<*> Table saved to {full_path}.", severity="info")
+
+        except:
+
+            self.notify(f"<!> Error failed to save Table to {full_path}.")
+
+
+    def action_fetch_mass_list(self):
+
+        if ("Fragment Table" not in self.title):
+
+            return
+
+        mass_list      = fetchMassList(self.df)
+        mass_list_df   = pd.DataFrame(mass_list, columns=["Mass", "Multiplicity"])
+        downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
+        file_name      = f"{self.title.replace("Fragment Table", "")} Mass List.csv"
+        full_path      = os.path.join(downloads_path, file_name)
+
+        try:
+
+            mass_list_df.to_csv(full_path, index=False, sep=" ")
+            self.notify(f"<*> Mass List saved to {full_path}.", severity="info")
+
+        except:
+
+            self.notify(f"<!> Error failed to save Mass List to {full_path}.")
 
 
     async def action_go_back(self):
@@ -120,18 +149,18 @@ def cli(ctx):
 
     if ctx.invoked_subcommand is None:
 
-        click.echo("====================================================")
-        click.echo("Welcome to the 3S2B-CLI v. 1.0.0                    ")
-        click.echo("                                                    ")
-        click.echo("~~~~                                                ")
-        click.echo("                                                    ")
-        click.echo("Jesse Fraser M.Sc. &                                ")
-        click.echo("Dr. Arun Moorthy Ph.D.                              ")
-        click.echo("                                                    ")
-        click.echo("CRAFTS Lab | Trent University | 2025                ")
-        click.echo("                                                    ")
-        click.echo("<*>type 3s2b --help for a list of available commands")
-        click.echo("====================================================")
+        click.echo("========================================================")
+        click.echo("+ Welcome to the 3S2B-CLI v. 1.0.0                     +")
+        click.echo("+                                                      +")
+        click.echo("+ ~~~~                                                 +")
+        click.echo("+                                                      +")
+        click.echo("+ Jesse Fraser M.Sc. &                                 +")
+        click.echo("+ Dr. Arun Moorthy Ph.D.                               +")
+        click.echo("+                                                      +")
+        click.echo("+ CRAFTS Lab | Trent University | 2025                 +")
+        click.echo("+                                                      +")
+        click.echo("+ <*>type 3s2b --help for a list of available commands +")
+        click.echo("========================================================")
 
         return
 
@@ -145,7 +174,11 @@ def cli(ctx):
 @click.argument("tol", type=float)
 def c(file_paths, tol):
 
-    print(f"FPIE: {compare(*file_paths, tol=tol):.4f}")
+    ms_data_path, mass_list_path = file_paths
+
+    ScrollableTable(pd.DataFrame([compare(*file_paths, tol=tol)], columns=["FPIE"]),
+                    f"{ms_data_path} {mass_list_path} FPIE").run()
+    # print(f"FPIE: {compare(*file_paths, tol=tol):.4f}")
 
 
 @click.command()
@@ -188,7 +221,7 @@ def fr(smiles):
     fragmentor     = Fragmentor()
     fragmentor.mol = Chem.MolFromSmiles(smiles)
 
-    return ScrollableTable(fragmentor.fetchAllFragsData(), f"{smiles} Fragment Data").run()
+    return ScrollableTable(fragmentor.fetchAllFragsData(), f"{smiles} Fragment Table").run()
 
 
 @click.command()
