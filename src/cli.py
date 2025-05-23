@@ -132,8 +132,7 @@ class ScrollableTable(App):
     @on(DataTable.RowSelected)
     async def row_selected(self, event: DataTable.RowSelected):
 
-        if (self.title == "MFD Index Table" or
-            re.match(r"^MFD Index Table >>> By mz: \d+\.\d{2}$", self.title)):
+        if (self.title == "MFD Index Table" or self.title == "MFD Index Table >>> By mz"):
 
             selected_idx = event.row_key.value
             selected_val = self.df.iloc[selected_idx, 1]
@@ -211,7 +210,7 @@ def f(search_term):
 @click.argument("mz")
 def m(mz):
 
-    ScrollableTable(searchAndFetchByMass(mz), f"MFD Index Table >>> By mz: {mz}").run()
+    ScrollableTable(searchAndFetchByMass(mz), f"MFD Index Table >>> By mz").run()
 
 
 @click.command()
