@@ -36,9 +36,9 @@ class Fragmentor():
     @maxMult.setter
     def maxMult(self, val: int) -> None:
 
-        if (val < 0):
+        if (val < 1):
             
-            raise ValueError(f"<!> {val} is not a positive integer.")
+            raise ValueError(f"<!> Error: {val} is not a positive integer.")
         
         self._maxMult = val
 
@@ -52,11 +52,15 @@ class Fragmentor():
     @mol.setter
     def mol(self, val: Chem.rdchem.Mol) -> None:
 
-        # TODO:
-        # Error handling
-        Chem.Kekulize(val, clearAromaticFlags=True)
-        val = Chem.AddHs(val)
+        try:
 
+            Chem.Kekulize(val, clearAromaticFlags=True)
+        
+        except Chem.rdchem.KekulizeException as e:
+
+            raise ValueError(f"<!> Error: kekulization failed >>> {e}")
+
+        val       = Chem.AddHs(val)
         self._mol = val
     
 
@@ -205,14 +209,25 @@ class Fragmentor():
         """
 
         isoMasses = []
-        sp        = iso.IsoTotalProb(formula=self._cleanMolFormula(mol),
-                                     prob_to_cover=0.9999)
+        formula   = formula=self._cleanMolFormula(mol)
 
-        for mass, prob in sp:
+        if (not formula):
 
-            if (prob > 0.01):
+            return []
 
-                isoMasses.append(mass)
+        try:
+
+            sp = iso.IsoTotalProb(formula=formula, prob_to_cover=0.9999)
+
+            for mass, prob in sp:
+
+                if (prob > 0.01):
+
+                    isoMasses.append(mass)
+
+        except Exception:
+
+            return []
 
         return isoMasses
     
@@ -239,16 +254,30 @@ class Fragmentor():
             fetchAllFrags().
         """
 
-        allFragsData = [
-            *[
-                [self._cleanMolSmiles(frag[0]),
-                 self._cleanMolFormula(frag[0]),
-                 Descriptors.ExactMolWt(frag[0]),
-                 ", ".join(map(str, self._fetchIsoMasses(frag[0]))),
-                 frag[1]]
-                 for frag in self.fetchAllFrags()
-            ]
-        ]
+        allFragsData = []
+
+        for frag in self.fetchAllFrags():
+
+            try:
+
+                smiles  = self._cleanMolSmiles(frag[0])
+                formula = self._cleanMolFormula(frag[0])
+
+                if (not smiles or not formula):
+
+                    continue
+
+                exactWt   = Descriptors.ExactMolWt(frag[0])
+                isoMasses = ", ".join(map(str, self._fetchIsoMasses(frag[0])))
+
+                allFragsData.append([smiles, formula, exactWt, isoMasses, frag[1]])
+
+            except Exception as e:
+
+                print(f"<*> Skipped fragment due to RDKit error >>> {e}")
+
+                continue
+
         allFragsDF   = pd.DataFrame(allFragsData,
                                     columns=["SMILES",
                                             "Formula",

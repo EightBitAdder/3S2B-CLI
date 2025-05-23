@@ -6,106 +6,181 @@ import pandas as pd
 from rdkit import Chem
 
 
-DB_PATH = "resource/swgdrugdb.db"
+##########
+# CONSTS #
+##########
+
+CURRENT_DIR     = os.path.dirname(os.path.abspath(__file__))
+DB_PATH         = os.path.abspath(
+    os.path.join(CURRENT_DIR, "..", "resource", "swgdrugdb.db")
+)
+##########
 
 
 def addEntryFromSmiles(smiles: str) -> None:
+    """
+    Adds an entry to the Molecular Fragment Database (M.F.D.)
+    by inserting it into the Index Table via a SMILES string, as well as
+    the corresponding Fragment Table.
 
-    conn   = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
 
-    cursor.execute("SELECT craftsLabEntry FROM idxTable WHERE SMILES = ?",
-                   (smiles,))
+    params:
+    -------
 
-    res = cursor.fetchone()
+    smiles:
+        The SMILES string of the molecule to be inserted.
 
-    if (res is not None):
 
-        print(f"<*> {smiles} already exists with craftsLabEntry: {res[0]}")
+    returns:
+    --------
 
-        conn.close()
+    None
+    """
 
-        return
+    if (not smiles):
+
+        raise ValueError("<!> Error: SMILES string must not be empty.")
 
     mol = Chem.MolFromSmiles(smiles)
 
     if (mol is None):
 
-        print(f"<*> {smiles} is not a valid SMILES string")
+        raise ValueError(f"<!> Error: {smiles} is not a valid SMILES string.")
 
-        conn.close()
+    with sqlite3.connect(DB_PATH) as conn:
 
-        return
+        cursor = conn.cursor()
 
-    cursor.execute("INSERT INTO idxTable (SMILES) VALUES (?)", (smiles,))
-    conn.commit()
+        cursor.execute("SELECT craftsLabEntry FROM idxTable WHERE SMILES = ?",
+                       (smiles,))
 
-    cursor.execute("SELECT craftsLabEntry FROM idxTable WHERE SMILES = ?",
+        res = cursor.fetchone()
+
+        if (res is not None):
+
+            print(f"<*> {smiles} already exists with craftsLabEntry: {res[0]}")
+
+            return
+
+
+        cursor.execute("INSERT INTO idxTable (SMILES) VALUES (?)", (smiles,))
+        conn.commit()
+        cursor.execute("SELECT craftsLabEntry FROM idxTable WHERE SMILES = ?",
                    (smiles,))
 
-    craftsLabEntry = cursor.fetchone()[0]
+        craftsLabEntry = cursor.fetchone()[0]
+        fragmentor     = Fragmentor()
+        fragmentor.mol = mol
+        allFragsDF     = fragmentor.fetchAllFragsData()
 
-    fragmentor     = Fragmentor()
-    fragmentor.mol = mol
-    allFragsDF     = fragmentor.fetchAllFragsData()
+        allFragsDF.to_sql(craftsLabEntry, conn, index=False)
 
-    allFragsDF.to_sql(craftsLabEntry, conn, index=False)
-
-    print(f"{craftsLabEntry} successfully added to the MFD.")
-
-    conn.commit()
-    cursor.close()
-    conn.close()
+        print(f"{craftsLabEntry} successfully added to the MFD.")
 
 
 def parseSearchTerm(searchTerm: str) -> str:
+    """
+    Parses the search term from either:
 
-    conn   = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
+        i) A Crafts Lab Entry in the form --- CL# ---; or,
 
-    if (not re.fullmatch(r"CL\d+", searchTerm)):
-        
-        cursor.execute("SELECT craftsLabEntry FROM idxTable WHERE SMILES = ?",
-                       (searchTerm,))
+        ii) A SMILES string,
 
-        craftsLabEntry = cursor.fetchone()[0]
+    to the corresponding Crafts Lab Entry.
 
-    else:
+
+    params:
+    -------
+
+    searchTerm: str
+        The search term to be parsed.
+
+
+    returns:
+    --------
+
+    craftsLabEntry: str
+        The Crafts Lab Entry.
+    """
+
+    with sqlite3.connect(DB_PATH) as conn:
+
+        cursor = conn.cursor()
+
+        if (not re.fullmatch(r"CL\d+", searchTerm)):
+            
+            cursor.execute("SELECT craftsLabEntry FROM idxTable WHERE SMILES = ?",
+                           (searchTerm,))
+
+            result = cursor.fetchone()
+
+            if (not result):
+
+                raise ValueError(f"<!> Error: {searchTerm} cannot be found.")
+
+            craftsLabEntry = result[0]
+
+            return craftsLabEntry
 
         craftsLabEntry = searchTerm
 
-    cursor.close()
-    conn.close()
-
-    return craftsLabEntry
+        return craftsLabEntry
 
 
 def searchAndFetch(searchTerm: str) -> pd.DataFrame:
+    """
+    Fetches the corresponding fragment table for the given search term.
 
-    try:
 
-        conn           = sqlite3.connect(DB_PATH)
-        cursor         = conn.cursor()
-        craftsLabEntry = parseSearchTerm(searchTerm)
-        allFragsDF     = pd.read_sql(f"SELECT * FROM {craftsLabEntry}", conn)
+    params:
+    -------
 
-        return allFragsDF
+    searchTerm: str
+        The name of the corresponding fragment table for the given search term
+        to be fetched.
 
-    except Exception as e:
 
-        raise e
+    returns:
+    --------
+    
+    allFragsDF: pd.DataFrame
+        The dataframe of the fragment table.
+    """
 
-    finally:
+    with sqlite3.connect(DB_PATH) as conn:
 
-        cursor.close()
-        conn.close()
+        try:
+
+            craftsLabEntry = parseSearchTerm(searchTerm)
+            allFragsDF     = pd.read_sql(f"SELECT * FROM {craftsLabEntry}", conn)
+
+            return allFragsDF
+
+        except Exception:
+
+            raise
 
 
 def viewIdxTable() -> pd.DataFrame:
+    """
+    Fetches the Index Table.
 
-    conn         = sqlite3.connect(DB_PATH)
-    idxTableAsDF = pd.read_sql(f"SELECT * FROM idxTable", conn)
 
-    conn.close()
+    params:
+    -------
 
-    return idxTableAsDF
+    None
+
+
+    returns:
+    --------
+
+    idxTableAsDF: pd.DataFrame
+        The Index Table as a pandas dataframe object.
+    """
+
+    with sqlite3.connect(DB_PATH) as conn:
+
+        idxTableAsDF = pd.read_sql(f"SELECT * FROM idxTable", conn)
+
+        return idxTableAsDF

@@ -1,5 +1,5 @@
 from fragmentor import Fragmentor
-from utils import fetchMassList, compare, compareAll
+from utils import fetchMassList, compare, compareAll, searchAndFetchByMass
 from db_utils import addEntryFromSmiles, searchAndFetch, viewIdxTable
 import os
 import pandas as pd
@@ -74,7 +74,7 @@ class ScrollableTable(App):
     def action_download(self):
 
         downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
-        file_name      = f"{title}.csv"
+        file_name      = f"{self.title}.csv"
         full_path      = os.path.join(downloads_path, file_name)
 
         try:
@@ -93,7 +93,7 @@ class ScrollableTable(App):
 
             return
 
-        mass_list      = fetchMassList(self.df)
+        mass_list      = fetchMassList(self.df).df
         mass_list_df   = pd.DataFrame(mass_list, columns=["Mass", "Multiplicity"])
         downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
         file_name      = f"{self.title.replace("Fragment Table", "")} Mass List.csv"
@@ -176,9 +176,10 @@ def c(file_paths, tol):
 
     ms_data_path, mass_list_path = file_paths
 
+    # TODO:
+    # Re-name file.
     ScrollableTable(pd.DataFrame([compare(*file_paths, tol=tol)], columns=["FPIE"]),
-                    f"{ms_data_path} {mass_list_path} FPIE").run()
-    # print(f"FPIE: {compare(*file_paths, tol=tol):.4f}")
+                    f"FPIE").run()
 
 
 @click.command()
@@ -204,6 +205,12 @@ def f(search_term):
 
         print(f"<*> {search_term} does not exist . . .")
 
+@click.command()
+@click.argument("mz")
+def m(mz):
+
+    ScrollableTable(searchAndFetchByMass(mz), f"Entries Containing: mz = {mz}").run()
+
 
 @click.command()
 @click.argument("args", nargs=-1)
@@ -213,12 +220,13 @@ def i(args):
 
 
 @click.command()
-@click.argument("smiles")
-def fr(smiles):
+@click.argument("smiles", type=str)
+@click.argument("maxMult", type=int)
+def fr(smiles, maxmult):
 
     # TODO:
     # Error handling
-    fragmentor     = Fragmentor()
+    fragmentor     = Fragmentor(maxMult=maxmult)
     fragmentor.mol = Chem.MolFromSmiles(smiles)
 
     return ScrollableTable(fragmentor.fetchAllFragsData(), f"{smiles} Fragment Table").run()
@@ -233,6 +241,7 @@ def add(smiles):
 
 cli.add_command(i)
 cli.add_command(f)
+cli.add_command(m)
 cli.add_command(c)
 cli.add_command(a)
 cli.add_command(fr)
