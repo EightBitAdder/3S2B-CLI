@@ -75,7 +75,7 @@ class ScrollableTable(App):
     def action_download(self):
 
         downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
-        file_name      = f"{self.title}.csv"
+        file_name      = f"table.csv"
         full_path      = os.path.join(downloads_path, file_name)
 
         try:
