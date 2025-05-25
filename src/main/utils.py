@@ -21,20 +21,45 @@ from matplotlib.lines import Line2D
 from tqdm import tqdm
 
 
-def fetchFileReader(filePath: str, *, isMassList: bool=False) -> TypedDataFrame:
-
-    if (isMassList):
-
-        fileReader = MassListReader(filePath)
-
-    else:
-
-        fileReader = MSDataReader(filePath)
-
-    return fileReader.read()
+class MassList():
 
 
-def fetchMassList(allFragsDF: pd.DataFrame) -> TypedDataFrame:
+    def __init__(self, df: pd.DataFrame, weighted: bool):
+
+        self.df       = df
+        self.weighted = weighted
+        self.masses   = df.iloc[:, 0].to_numpy()
+        self.mults    = df.iloc[:, 1].to_numpy() if df.shape[1] > 1 else np.ones(len(df))
+
+
+    @classmethod
+    def fromFile(cls, filePath: str) -> "MassList":
+
+        typedDF = MassListReader(filePath).read()
+        weighted = (typedDF.type == FileType.MASS_LIST_DATA_DOBULE)
+
+        return cls(typedDF.df, weighted)
+
+
+class MSData():
+
+
+    def __init__(self, df: pd.DataFrame):
+
+        self.df          = df
+        self.masses      = df.iloc[:, 0].to_numpy()
+        self.intensities = df.iloc[:, 1].to_numpy()
+
+
+    @classmethod
+    def fromFile(cls, filePath: str) -> "MSData":
+
+        typedDF = MSDataReader(filePath).read()
+
+        return cls(typedDF.df)
+
+
+def fetchMassList(allFragsDF: pd.DataFrame) -> MassList:
 
     massList = []
 
@@ -45,24 +70,20 @@ def fetchMassList(allFragsDF: pd.DataFrame) -> TypedDataFrame:
 
         massList.extend([mass, row.Mult] for mass in masses)
 
-    return TypedDataFrame(
-        pd.DataFrame(
-            massList,
-            columns=["Mass", "Multiplicity"]
-        ),
-        FileType.MASS_LIST_DATA_DOBULE
-    )
+    df = pd.DataFrame(massList, columns=["Mass", "Multiplicity"])
+
+    return MassList(df, weighted=True)
 
 
 def compare(msDataPath: str, massListPath: str, *, tol: float) -> float:
     
-    msDataTyped             = fetchFileReader(msDataPath)
-    massListTyped           = fetchFileReader(massListPath, isMassList=True)
+    msData                  = MSData.fromFile(msDataPath)
+    massList                = MassList.fromFile(massListPath)
     FPIEScore, plotMetaData = FPIE(
-        msDataTyped.df.to_numpy(),
-        massListTyped.df.to_numpy(),
+        msData,
+        massList,
         tol=tol,
-        weighted=(massListTyped.type == FileType.MASS_LIST_DATA_DOBULE),
+        weighted=massList.weighted
     )
 
     plotFPIE(
@@ -76,19 +97,19 @@ def compare(msDataPath: str, massListPath: str, *, tol: float) -> float:
 
 def compareAll(msDataPath: str, *, tol: float) -> pd.DataFrame:
 
-    msDataTyped     = fetchFileReader(msDataPath)
+    msData          = MSData.fromFile(msDataPath)
     FPIEs           = []
     idxTableDF      = viewIdxTable()
     craftsLabEntrys = idxTableDF.iloc[:, 1]
 
     for entry in tqdm(craftsLabEntrys, desc=f"<*> Calculating FPIEs . . ."):
 
-        massListTyped = fetchMassList(searchAndFetch(entry))
+        massList      = fetchMassList(searchAndFetch(entry))
         FPIEScore, _  = FPIE(
-            msDataTyped.df.to_numpy(),
-            massListTyped.df.to_numpy(),
+            msData,
+            massList,
             tol=tol,
-            weighted=(massListTyped.type == FileType.MASS_LIST_DATA_DOBULE)
+            weighted=massList.weighted
         )
         
         FPIEs.append(FPIEScore)
@@ -107,9 +128,9 @@ def searchAndFetchByMass(mz: float) -> pd.DataFrame:
 
     for idx, entry in tqdm(idxTableDF.iloc[:, 1].items(), desc=f"<*> Fetching fragments . . ."):
 
-        massList = fetchMassList(searchAndFetch(entry)).df.iloc[:, 0].round(2)
+        massList = fetchMassList(searchAndFetch(entry))
 
-        if (mz in massList.values):
+        if (mz in np.round(massList.masses, 2)):
 
             filteredRows.append(idx)
             tqdm.write(f"<*> Found a match!")
@@ -190,19 +211,15 @@ def plotFPIE(plotMetaData: dict, FPIEScore: float, title: str="") -> None:
         plt.show()
 
 
-def FPIE(msData: np.ndarray,
-         massList: np.ndarray,
+def FPIE(msData: MSData,
+         massList: MassList,
          *,
          tol: float,
          weighted: bool=False) -> float:
 
-    if (massList.ndim == 1):
-
-        massList = np.column_stack((massList, np.zeros_like(massList)))
-
-    masses       = massList[:, 0]
-    mults        = massList[:, 1]
-    msDataMasses = np.unique(msData[:, 0])
+    masses       = massList.masses
+    mults        = massList.mults
+    msDataMasses = np.unique(msData.masses)
 
     if (tol == 0):
 
@@ -242,7 +259,7 @@ def FPIE(msData: np.ndarray,
 
     explainedIntensities = []
 
-    for mz, intensity in msData:
+    for mz, intensity in zip(msData.masses, msData.intensities):
 
         mzKey = round(mz) if tol == 0 else np.round(mz, 2)
 
@@ -250,7 +267,7 @@ def FPIE(msData: np.ndarray,
 
             explainedIntensities.append(intensity * matchedWeights[mzKey])
 
-    msDataIntensities = msData[:, 1]
+    msDataIntensities = msData.intensities
     FPIEScore         = float(sum(explainedIntensities) / np.sum(msDataIntensities))
 
     return FPIEScore, {
