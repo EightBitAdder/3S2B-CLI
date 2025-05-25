@@ -1,6 +1,7 @@
 resource/swgdrugdb.db
 resource/dartms/
 resource/eims/
+resource/examples
 src/3s2b.egg-info/
 src/3s2b.egg-info/
 src/__pycache__/

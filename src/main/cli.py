@@ -1,6 +1,6 @@
-from fragmentor import Fragmentor
-from utils import fetchMassList, compare, compareAll, searchAndFetchByMass
-from db_utils import addEntryFromSmiles, searchAndFetch, viewIdxTable
+from main.fragmentor import Fragmentor
+from main.utils import fetchMassList, compare, compareAll, searchAndFetchByMass
+from db.utils import addEntryFromSmiles, searchAndFetch, viewIdxTable
 import os
 import re
 import pandas as pd
@@ -191,7 +191,7 @@ def a(ms_data_path, tol):
     result = compareAll(ms_data_path, tol=tol)
     result = result.sort_values(by="FPIE", ascending=False)
 
-    ScrollableTable(result, "SWGDRUG SMILES w/ FPIEs").run()
+    ScrollableTable(result, f"SWGDRUG SMILES w/ FPIEs >>> {os.path.splitext(os.path.basename(ms_data_path))[0]}").run()
 
 
 @click.command()

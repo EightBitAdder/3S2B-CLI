@@ -1,6 +1,6 @@
 """
-A module to parse the SWGDRUG.SDF file
-in order to create the Molecular Fragment Database (M.F.D.).
+A script to parse the SWGDRUG.SDF file
+in order to create the Molecular Fragment Database (MFD).
 
     *Note*:
     -------
@@ -17,7 +17,7 @@ in order to create the Molecular Fragment Database (M.F.D.).
         May, 2025
 """
 
-from src.fragmentor import Fragmentor
+from main.fragmentor import Fragmentor
 import os
 import sqlite3
 from rdkit import Chem
@@ -77,12 +77,12 @@ def makeDB() -> None:
             
             try:
 
-                name           = mol.GetProp("_Name") if mol.HasProp("_Name") else "<unkown>"
+                name           = mol.GetProp("_Name") if mol.HasProp("_Name") else "> Unknown <"
                 smiles         = Chem.MolToSmiles(mol)
 
                 if (not smiles):
 
-                    raise ValueError("<!> Error: {name} has an empty SMILES string.")
+                    raise ValueError(f"<!> Error: > {name} < has an empty SMILES string.")
 
                 fragmentor     = Fragmentor()
                 fragmentor.mol = mol
@@ -90,7 +90,7 @@ def makeDB() -> None:
 
             except Exception as e:
 
-                tqdm.write(f"<*> Skipped molecule: {name} >>> {e}")
+                tqdm.write(f"<*> Skipped molecule: > {name} < >>> {e}")
 
                 continue
 
@@ -121,19 +121,22 @@ def makeDB() -> None:
                         try:
                     
                             allFragsDF.to_sql(craftsLabEntry, conn, index=False)
-                            tqdm.write(f"<*> Created fragment table: {craftsLabEntry}.")
+                            tqdm.write(f"<*> Created fragment table: {craftsLabEntry}, " \
+                                       f"with name: > {name} <.")
 
                         except Exception as e:
 
-                            tqdm.write(f"<*> Failed to create fragment table: {craftsLabEntry} >>> {e}")
+                            tqdm.write(f"<*> Failed to create fragment table: {craftsLabEntry}, " \
+                                       f"with name: > {name} < >>> {e}")
 
                     else:
 
-                        tqdm.write(f"<*> Skipped empty fragment table: {craftsLabEntry}.")
+                        tqdm.write(f"<*> Skipped empty fragment table: {craftsLabEntry}, " \
+                                   f"with name: > {name} <.")
 
             except sqlite3.DatabaseError as e:
 
-                tqdm.write(f"<!> Error: database failure for molecule: {name} >>> {e}")
+                tqdm.write(f"<!> Error: database failure for molecule: > {name} < >>> {e}")
 
         conn.commit()
 

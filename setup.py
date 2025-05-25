@@ -24,7 +24,7 @@ setup(
 	install_requires=install_dependencies(),
 	entry_points={
 		"console_scripts": [
-			"3s2b=cli:cli",
+			"3s2b=main.cli:cli",
 			"make-db=db.make:makeDB"
 		]
 	}

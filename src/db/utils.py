@@ -1,4 +1,4 @@
-from fragmentor import Fragmentor
+from main.fragmentor import Fragmentor
 import os
 import re
 import sqlite3
@@ -12,30 +12,13 @@ from rdkit import Chem
 
 CURRENT_DIR     = os.path.dirname(os.path.abspath(__file__))
 DB_PATH         = os.path.abspath(
-    os.path.join(CURRENT_DIR, "..", "resource", "swgdrugdb.db")
+    os.path.join(CURRENT_DIR, "..", "..", "resource", "swgdrugdb.db")
 )
+
 ##########
 
 
 def addEntryFromSmiles(smiles: str) -> None:
-    """
-    Adds an entry to the Molecular Fragment Database (M.F.D.)
-    by inserting it into the Index Table via a SMILES string, as well as
-    the corresponding Fragment Table.
-
-
-    params:
-    -------
-
-    smiles:
-        The SMILES string of the molecule to be inserted.
-
-
-    returns:
-    --------
-
-    None
-    """
 
     if (not smiles):
 
@@ -75,33 +58,10 @@ def addEntryFromSmiles(smiles: str) -> None:
 
         allFragsDF.to_sql(craftsLabEntry, conn, index=False)
 
-        print(f"{craftsLabEntry} successfully added to the MFD.")
+        print(f"<*> {craftsLabEntry} was successfully added to the MFD.")
 
 
 def parseSearchTerm(searchTerm: str) -> str:
-    """
-    Parses the search term from either:
-
-        i) A Crafts Lab Entry in the form --- CL# ---; or,
-
-        ii) A SMILES string,
-
-    to the corresponding Crafts Lab Entry.
-
-
-    params:
-    -------
-
-    searchTerm: str
-        The search term to be parsed.
-
-
-    returns:
-    --------
-
-    craftsLabEntry: str
-        The Crafts Lab Entry.
-    """
 
     with sqlite3.connect(DB_PATH) as conn:
 
@@ -128,24 +88,6 @@ def parseSearchTerm(searchTerm: str) -> str:
 
 
 def searchAndFetch(searchTerm: str) -> pd.DataFrame:
-    """
-    Fetches the corresponding fragment table for the given search term.
-
-
-    params:
-    -------
-
-    searchTerm: str
-        The name of the corresponding fragment table for the given search term
-        to be fetched.
-
-
-    returns:
-    --------
-    
-    allFragsDF: pd.DataFrame
-        The dataframe of the fragment table.
-    """
 
     with sqlite3.connect(DB_PATH) as conn:
 
@@ -162,22 +104,6 @@ def searchAndFetch(searchTerm: str) -> pd.DataFrame:
 
 
 def viewIdxTable() -> pd.DataFrame:
-    """
-    Fetches the Index Table.
-
-
-    params:
-    -------
-
-    None
-
-
-    returns:
-    --------
-
-    idxTableAsDF: pd.DataFrame
-        The Index Table as a pandas dataframe object.
-    """
 
     with sqlite3.connect(DB_PATH) as conn:
 
