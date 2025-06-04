@@ -9,6 +9,7 @@ from main.comparator import (
 )
 import os
 import pandas as pd
+import numpy as np
 from tqdm import tqdm
 
 
@@ -34,7 +35,7 @@ def searchAndFetchByMass(mz: float) -> pd.DataFrame:
     idxTableDF   = viewIdxTable()
     filteredRows = []
 
-    for idx, entry in tqdm(idxTableDF.iloc[:, 1].items(), desc=f"<*> Fetching fragments . . ."):
+    for idx, entry in tqdm(idxTableDF.iloc[:, 1].items(), desc="<*> Fetching fragments . . ."):
 
         massList = fetchMassList(searchAndFetch(entry))
 

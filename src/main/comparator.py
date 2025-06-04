@@ -131,6 +131,7 @@ class Comparator():
 			"matchedWeights": matchedWeights
 		}
 
+
 	def plotFPIE(self, plotMetaData: Dict, FPIEScore: float, title: str="") -> None:
 
 		fig, ax = plt.subplots()

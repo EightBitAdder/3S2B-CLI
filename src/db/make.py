@@ -39,6 +39,7 @@ DB_PATH         = os.path.abspath(
 SWGDRUG313_PATH = os.path.abspath(
     os.path.join(CURRENT_DIR, "..", "..", "resource", "SWGDRUG313.SDF")
 )
+
 ##########
 
 

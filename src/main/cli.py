@@ -13,10 +13,6 @@ from textual.widgets import DataTable, Footer
 from rdkit import Chem
 
 
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH     = os.path.abspath(os.path.join(CURRENT_DIR, "..", "resource", "swgdrugdb.db"))
-
-
 class ScrollableTable(App):
 
     BINDINGS = [("escape", "go_back", "Go Back"),
