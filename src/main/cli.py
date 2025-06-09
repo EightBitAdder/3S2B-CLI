@@ -128,7 +128,7 @@ class ScrollableTable(App):
     @on(DataTable.RowSelected)
     async def row_selected(self, event: DataTable.RowSelected):
 
-        if (self.title == "MFD Index Table" or self.title == "MFD Index Table >>> By mz"):
+        if (self.title == "MFD Index Table"):
 
             selected_idx = event.row_key.value
             selected_val = self.df.iloc[selected_idx, 1]

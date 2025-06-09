@@ -278,12 +278,12 @@ class Fragmentor():
 
                 continue
 
-        allFragsDF   = pd.DataFrame(allFragsData,
-                                    columns=["SMILES",
-                                            "Formula",
-                                            "Exact_Mol_Wt",
-                                            "Iso_Wts",
-                                            "Mult"])
+        allFragsDF = pd.DataFrame(allFragsData,
+                                  columns=["SMILES",
+                                           "Formula",
+                                           "Exact_Mol_Wt",
+                                           "Iso_Wts",
+                                           "Mult"])
         
         allFragsDF.drop_duplicates(inplace=True)
 

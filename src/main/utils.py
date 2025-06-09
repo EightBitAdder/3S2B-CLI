@@ -33,18 +33,21 @@ def searchAndFetchByMass(mz: float) -> pd.DataFrame:
 
     mz           = round(float(mz), 2)
     idxTableDF   = viewIdxTable()
-    filteredRows = []
+    # filteredRows = []
+    rows = []
 
-    for idx, entry in tqdm(idxTableDF.iloc[:, 1].items(), desc="<*> Fetching fragments . . ."):
+    for smiles, craftsLabEntry in tqdm(idxTableDF.iloc[:, 1].items(), desc="<*> Fetching fragments . . ."):
 
-        massList = fetchMassList(searchAndFetch(entry))
+        for row in searchAndFetch(craftsLabEntry).itertuples():
 
-        if (mz in np.round(massList.masses, 2)):
+            Iso_Wts = list(map(float, row.Iso_Wts.split(", ")))
+            masses  = [row.Exact_Mol_Wt, *Iso_Wts]
 
-            filteredRows.append(idx)
-            tqdm.write(f"<*> Found a match!")
+            if (mz in np.round(masses, 2)):
 
-    return idxTableDF.loc[filteredRows].reset_index(drop=True)
+                rows.append(row)
+
+    return pd.DataFrame(rows)
 
 
 def compare(msDataPath: str, massListPath: str, *, tol: float) -> float:
