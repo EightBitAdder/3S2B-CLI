@@ -29,8 +29,8 @@ class MassList():
     @classmethod
     def fromFile(cls, filePath: str) -> "MassList":
 
-        typedDF = MassListReader(filePath).read()
-        weighted = (typedDF.type == FileType.MASS_LIST_DATA_DOBULE)
+        typedDF = MassListReader(filePath, delimiter=r"\s+").typedDF
+        weighted = (typedDF.fileType == FileType.MASS_LIST_DATA_DOUBLE)
 
         return cls(typedDF.df, weighted)
 
@@ -48,9 +48,7 @@ class MSData():
     @classmethod
     def fromFile(cls, filePath: str) -> "MSData":
 
-        typedDF = MSDataReader(filePath).read()
-
-        return cls(typedDF.df)
+        return cls(MSDataReader(filePath, delimiter=r"\s+").typedDF.df)
 
 
 class Comparator():
