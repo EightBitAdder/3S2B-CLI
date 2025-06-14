@@ -1,6 +1,11 @@
 from main.fragmentor import Fragmentor
-from main.utils import fetchMassList, compare, compareAll, searchAndFetchByMass
+from main.utils import fetchMassList, compareAll, searchAndFetchByMass
 from db.utils import addEntryFromSmiles, searchAndFetch, viewIdxTable
+from main.comparator import (
+    MassList,
+    MSData,
+    Comparator
+)
 import os
 import re
 import pandas as pd
@@ -10,6 +15,7 @@ from textual.app import App
 from textual import on
 from textual.containers import Vertical
 from textual.widgets import DataTable, Footer
+from tqdm import tqdm
 from rdkit import Chem
 
 
@@ -167,27 +173,58 @@ def cli(ctx):
 
 
 @click.command()
-@click.argument("file_paths", nargs=-1, type=click.Path(exists=True))
+@click.argument("file_paths", nargs=2, type=click.Path(exists=True))
 @click.argument("tol", type=float)
-def c(file_paths, tol):
+@click.option("--sr", default="MS-DATA", help="<*> MS-Data file reader")
+@click.option("--lr", default="MASS-LIST", help="<*> Mass-List file reader")
+@click.option("--dr", default=None, help="<*> MS-Data file and Mass-List file delimiter")
+@click.option("--wf", default=None, help="<*> Weight Function")
+@click.option("--plot", is_flag=True, help="<*> Plot Annotated FPIE")
+def c(file_paths, tol, sr, lr, dr, wf, plot):
 
     ms_data_path, mass_list_path = file_paths
 
-    # TODO:
-    # Re-name file.
-    ScrollableTable(pd.DataFrame([compare(*file_paths, tol=tol)], columns=["FPIE"]),
-                    f"FPIE").run()
+    ms_data                 = MSData.fromFile(ms_data_path, delimiter=dr, fileReader=sr)
+    mass_list               = MassList.fromFile(mass_list_path, delimiter=dr, fileReader=lr)
+    comparator              = Comparator(ms_data, mass_list, tol, weightFunction=wf)
+    FPIEScore, plotMetaData = comparator.calculateFPIE()
+
+    if (plot):
+
+        comparator.plotFPIE(
+            plotMetaData,
+            FPIEScore,
+            os.path.splitext(os.path.basename(ms_data_path))[0]
+        )
+
+    ScrollableTable(pd.DataFrame([[FPIEScore]], columns=["FPIE"]), f"FPIE").run()
 
 
 @click.command()
 @click.argument("ms_data_path", type=click.Path(exists=True))
 @click.argument("tol", type=float)
-def a(ms_data_path, tol):
+@click.option("--sr", default="MS-DATA", help="<*> MS-Data file reader")
+@click.option("--dr", default=None, help="<*> MS-Data file and Mass-List file delimiter")
+@click.option("--wf", default=None, help="<*> Weight Function")
+def a(ms_data_path, tol, sr, dr, wf):
 
-    result = compareAll(ms_data_path, tol=tol)
-    result = result.sort_values(by="FPIE", ascending=False)
+    ms_data           = MSData.fromFile(ms_data_path, delimiter=dr, fileReader=sr)
+    idx_table_df      = viewIdxTable()
+    crafts_lab_entrys = idx_table_df.iloc[:, 1]
+    FPIEs             = []
 
-    ScrollableTable(result, f"SWGDRUG SMILES w/ FPIEs >>> {os.path.splitext(os.path.basename(ms_data_path))[0]}").run()
+    for entry in tqdm(crafts_lab_entrys, desc=f"<*> Calculating FPIEs . . ."):
+
+        mass_list    = fetchMassList(searchAndFetch(entry))
+        comparator   = Comparator(ms_data, mass_list, tol, weightFunction=wf)
+        FPIEScore, _ = comparator.calculateFPIE()
+
+        FPIEs.append(FPIEScore)
+
+    df = pd.concat([idx_table_df.iloc[:, 0], pd.DataFrame({"FPIE": FPIEs})], axis=1)
+    df = df.sort_values(by="FPIE", ascending=False)
+
+    ScrollableTable(df, f"SWGDRUG SMILES w/ FPIEs >>> {os.path.splitext(os.path.basename(ms_data_path))[0]}").run()
 
 
 @click.command()

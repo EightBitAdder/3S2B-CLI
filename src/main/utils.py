@@ -48,35 +48,3 @@ def searchAndFetchByMass(mz: float) -> pd.DataFrame:
                 rows.append(row)
 
     return pd.DataFrame(rows)
-
-
-def compare(msDataPath: str, massListPath: str, *, tol: float) -> float:
-    
-    msData                  = MSData.fromFile(msDataPath)
-    massList                = MassList.fromFile(massListPath)
-    comparator              = Comparator(msData, massList, tol)
-    FPIEScore, plotMetaData = comparator.calculateFPIE()
-
-    comparator.plotFPIE(plotMetaData, FPIEScore, os.path.splitext(os.path.basename(msDataPath))[0])
-
-    return FPIEScore
-
-
-def compareAll(msDataPath: str, *, tol: float) -> pd.DataFrame:
-
-    msData          = MSData.fromFile(msDataPath)
-    idxTableDF      = viewIdxTable()
-    craftsLabEntrys = idxTableDF.iloc[:, 1]
-    FPIEs           = []
-
-    for entry in tqdm(craftsLabEntrys, desc=f"<*> Calculating FPIEs . . ."):
-
-        massList     = fetchMassList(searchAndFetch(entry))
-        comparator   = Comparator(msData, massList, tol)
-        FPIEScore, _ = comparator.calculateFPIE()
-
-        FPIEs.append(FPIEScore)
-
-    df = pd.concat([idxTableDF.iloc[:, 0], pd.DataFrame({"FPIE": FPIEs})], axis=1)
-
-    return df

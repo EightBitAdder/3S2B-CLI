@@ -1,11 +1,12 @@
 from typing import Tuple, Dict
-from file_readers.utils import (
-    FileType,
-    TypedDataFrame,
-    FileReader,
-    DelimitedFileReader,
-    MassListReader,
-    MSDataReader
+from dataclasses import dataclass
+from file_readers.registry import fetchFileReader
+from file_readers.file_reader import FileType
+from .weight_functions import (
+	WeightFunction,
+	ConstantWeight,
+	ExponentialDecayWeight,
+	fetchWeightFunction
 )
 import pandas as pd
 import numpy as np
@@ -27,9 +28,9 @@ class MassList():
 
 
     @classmethod
-    def fromFile(cls, filePath: str) -> "MassList":
+    def fromFile(cls, filePath: str, *, delimiter: str | None=None, fileReader: str="MASS-LIST") -> "MassList":
 
-        typedDF = MassListReader(filePath, delimiter=r"\s+").typedDF
+        typedDF  = fetchFileReader(fileReader, filePath, delimiter=delimiter).typedDF
         weighted = (typedDF.fileType == FileType.MASS_LIST_DATA_DOUBLE)
 
         return cls(typedDF.df, weighted)
@@ -46,31 +47,58 @@ class MSData():
 
 
     @classmethod
-    def fromFile(cls, filePath: str) -> "MSData":
+    def fromFile(cls, filePath: str, *, delimiter: str | None=None, fileReader: str="MS-DATA") -> "MSData":
 
-        return cls(MSDataReader(filePath, delimiter=r"\s+").typedDF.df)
+        return cls(fetchFileReader(fileReader, filePath, delimiter=delimiter).typedDF.df)
+
+
+@dataclass
+class PlotMetaData:
+
+	msDataMasses     : np.ndarray
+	msDataIntensities: np.ndarray
+	matchedMults     : Dict[float, int]
+	massesMultsDict  : Dict[float, int]
+	weights          : Dict[float, float]
+	matchedWeights   : Dict[float, float]
 
 
 class Comparator():
 
 	
-	def __init__(self, msData: MSData, massList: MassList, tol: float):
+	def __init__(self, msData: MSData, massList: MassList, tol: float, weightFunction: str | None=None):
 
 		self.msData   = msData
 		self.massList = massList
 		self.tol      = tol
 
-		if (tol == 0):
+		if (isinstance(weightFunction, str)):
 
-			self.msDataMasses   = np.unique(np.round(msData.masses).astype(int))
-			self.massListMasses = np.round(massList.masses).astype(int)
+			self.weightFunction = fetchWeightFunction(weightFunction)
 
 		else:
 
-			self.msDataMasses   = np.unique(np.round(msData.masses, 2))
-			self.massListMasses = np.round(massList.masses, 2)
+			self.weightFunction = (
+				ExponentialDecayWeight() if massList.weighted else ConstantWeight()
+			)
 
-		self.weights, self.massesMultsDict = self._fetchWeights()
+		self.msDataMasses, self.massListMasses = self._roundMasses()
+		self.weights, self.massesMultsDict     = self._fetchWeights()
+
+
+	def _roundMasses(self) -> Tuple[np.ndarray, np.ndarray]:
+
+		if (self.tol == 0):
+
+			return (
+				np.unique(np.round(self.msData.masses).astype(int)),
+				np.round(self.massList.masses).astype(int)
+			)
+		else:
+			return(
+				np.unique(np.round(self.msData.masses, 2)),
+				np.round(self.massList.masses, 2)
+			)
 
 
 	def _fetchWeights(self):
@@ -85,7 +113,7 @@ class Comparator():
 
 		masses  = np.array(list(massesMultsDict.keys()))
 		weights = np.array([
-			np.exp(-(0.01 * massesMultsDict[m])) if self.massList.weighted else 1.0
+			self.weightFunction.compute(m, massesMultsDict[m])
 			for m in masses
 		])
 
@@ -118,34 +146,35 @@ class Comparator():
 
 				explainedIntensities.append(intensity * matchedWeights[mz])
 
-		FPIEScore = float(sum(explainedIntensities) / np.sum(self.msData.intensities))
+		FPIEScore    = float(sum(explainedIntensities) / np.sum(self.msData.intensities))
+		plotMetaData = PlotMetaData(
+			msDataMasses=self.msDataMasses,
+			msDataIntensities=self.msData.intensities,
+			matchedMults=matchedMults,
+			massesMultsDict=self.massesMultsDict,
+			weights=self.weights,
+			matchedWeights=matchedWeights
+		)
 
-		return FPIEScore, {
-			"msDataMasses": self.msDataMasses,
-			"msDataIntensities": self.msData.intensities,
-			"matchedMults": matchedMults,
-			"massesMultsDict": self.massesMultsDict,
-			"weights": self.weights,
-			"matchedWeights": matchedWeights
-		}
+		return FPIEScore, plotMetaData
 
 
-	def plotFPIE(self, plotMetaData: Dict, FPIEScore: float, title: str="") -> None:
+	def plotFPIE(self, plotMetaData: PlotMetaData, FPIEScore: float, title: str="") -> None:
 
 		fig, ax = plt.subplots()
 
 		fig.patch.set_facecolor("darkblue")
 		ax.set_facecolor("white")
 
-		mults         = sorted(set(plotMetaData["massesMultsDict"].values()))
+		mults         = sorted(set(plotMetaData.massesMultsDict.values()))
 		colorMap      = cm.get_cmap("tab20b", len(mults))
 		multsColorMap = {m: colorMap(i) for i, m in enumerate(mults)}
 
-		for i, mz in enumerate(plotMetaData["msDataMasses"]):
+		for i, mz in enumerate(plotMetaData.msDataMasses):
 
-			intensity      = plotMetaData["msDataIntensities"][i]
+			intensity      = plotMetaData.msDataIntensities[i]
 			color          = multsColorMap.get(
-				plotMetaData["matchedMults"].get(mz, None),
+				plotMetaData.matchedMults.get(mz, None),
 				"black"
 			)
 			_, stemline, _ = ax.stem(
@@ -156,7 +185,7 @@ class Comparator():
 				basefmt=" "
 			)
 
-			if (mz not in plotMetaData["matchedWeights"]):
+			if (mz not in plotMetaData.matchedWeights):
 
 				ax.text(
 					mz,
