@@ -1,5 +1,5 @@
 from main.fragmentor import Fragmentor
-from main.utils import fetchMassList, compareAll, searchAndFetchByMass
+from main.utils import fetchMassList, searchAndFetchByMass
 from db.utils import addEntryFromSmiles, searchAndFetch, viewIdxTable
 from main.comparator import (
     MassList,
