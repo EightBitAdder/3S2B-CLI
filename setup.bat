@@ -10,6 +10,7 @@ if errorlevel 1 (
     echo.
     echo [ERROR] Python 3.12.7 is required.
     echo Please install Python 3.12.7 before continuing.
+    pause
     exit /b 1
 )
 
@@ -28,6 +29,7 @@ if exist ".venv\Scripts\activate.bat" (
 ) else (
     echo.
     echo [ERROR] Failed to activate virtual environment.
+    pause
     exit /b 1
 )
 
@@ -41,7 +43,14 @@ pip install -e .
 
 echo.
 echo [INFO] Creating the MFD . . .
-python -c "from db.make import makeDB; makeDB()"
+make-db
+
+if errorlevel 1 (
+    echo.
+    echo [ERROR] Failed to create the MFD.
+    pause
+    exit /b 1
+)
 
 echo.
 echo [SUCCESS] Setup complete!

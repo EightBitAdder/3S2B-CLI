@@ -8,6 +8,7 @@ from main.comparator import (
 )
 import os
 import re
+import numpy as np
 import pandas as pd
 import sqlite3
 import click
@@ -137,7 +138,7 @@ class ScrollableTable(App):
         if (self.title == "MFD Index Table"):
 
             selected_idx = event.row_key.value
-            selected_val = self.df.iloc[selected_idx, 1]
+            selected_val = self.df.iloc[selected_idx, 0]
             new_df       = searchAndFetch(selected_val)
 
             self.parent_df    = self.df
@@ -210,7 +211,7 @@ def a(ms_data_path, tol, sr, dr, wf):
 
     ms_data           = MSData.fromFile(ms_data_path, delimiter=dr, fileReader=sr)
     idx_table_df      = viewIdxTable()
-    crafts_lab_entrys = idx_table_df.iloc[:, 1]
+    crafts_lab_entrys = idx_table_df.iloc[:, 2]
     FPIEs             = []
 
     for entry in tqdm(crafts_lab_entrys, desc=f"<*> Calculating FPIEs . . ."):
@@ -221,7 +222,7 @@ def a(ms_data_path, tol, sr, dr, wf):
 
         FPIEs.append(FPIEScore)
 
-    df = pd.concat([idx_table_df.iloc[:, 0], pd.DataFrame({"FPIE": FPIEs})], axis=1)
+    df = pd.concat([pd.DataFrame({"FPIE": np.round(FPIEs, 2)}), idx_table_df.iloc[:, 1:3]], axis=1)
     df = df.sort_values(by="FPIE", ascending=False)
 
     ScrollableTable(df, f"SWGDRUG SMILES w/ FPIEs >>> {os.path.splitext(os.path.basename(ms_data_path))[0]}").run()

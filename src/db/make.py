@@ -51,8 +51,10 @@ def makeDB() -> None:
 
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS idxTable (
-                SMILES TEXT PRIMARY KEY,
-                craftsLabEntry TEXT
+                craftsLabEntry TEXT PRIMARY KEY,
+                name TEXT,
+                SMILES TEXT,
+                UNIQUE(name, SMILES)
             );
         """)
 
@@ -97,47 +99,39 @@ def makeDB() -> None:
 
             try:
 
-                cursor.execute("SELECT craftsLabEntry FROM idxTable WHERE SMILES = ?", (smiles,))
+                cursor.execute("""
+                    INSERT INTO idxTable (name, SMILES)
+                    VALUES (?, ?)
+                """, (name, smiles))
+                conn.commit()
+                cursor.execute("""
+                    SELECT craftsLabEntry FROM idxTable
+                    WHERE name = ? AND SMILES = ?
+                """, (name, smiles))
 
-                row = cursor.fetchone()
+                craftsLabEntry = cursor.fetchone()[0]
 
-                if (row):
+                if (not allFragsDF.empty):
 
-                    craftsLabEntry = row[0]
+                    try:
+
+                        allFragsDF.to_sql(craftsLabEntry, conn, index=False)
+                        tqdm.write(f"<*> Created fragment table: {craftsLabEntry}, " \
+                                   f"with name: > {name} <.")
+
+                    except Exception as e:
+
+                        tqdm.write(f"<*> Failed to create fragment table: {craftsLabEntry}, " \
+                                   f"with name: > {name} < >>> {e}")
 
                 else:
 
-                    cursor.execute("INSERT INTO idxTable (SMILES) VALUES (?)", (smiles,))
-                    conn.commit()
-                    cursor.execute("SELECT craftsLabEntry FROM idxTable WHERE SMILES = ?", (smiles,))
-
-                    craftsLabEntry = cursor.fetchone()[0]
-                
-                cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name = ?", (craftsLabEntry,))
-
-                if (cursor.fetchone() is None):
-
-                    if (not allFragsDF.empty):
-
-                        try:
-                    
-                            allFragsDF.to_sql(craftsLabEntry, conn, index=False)
-                            tqdm.write(f"<*> Created fragment table: {craftsLabEntry}, " \
-                                       f"with name: > {name} <.")
-
-                        except Exception as e:
-
-                            tqdm.write(f"<*> Failed to create fragment table: {craftsLabEntry}, " \
-                                       f"with name: > {name} < >>> {e}")
-
-                    else:
-
-                        tqdm.write(f"<*> Skipped empty fragment table: {craftsLabEntry}, " \
-                                   f"with name: > {name} <.")
+                    tqdm.write(f"<*> Skipped empty fragment table: {craftsLabEntry}, " \
+                               f"with name: > {name} <.")
 
             except sqlite3.DatabaseError as e:
 
-                tqdm.write(f"<!> Error: database failure for molecule: > {name} < >>> {e}")
+                tqdm.write(f"<*> Database failure for molecule > {name} < >>> {e}")
 
         conn.commit()
 
