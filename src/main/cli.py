@@ -213,16 +213,19 @@ def a(ms_data_path, tol, sr, dr, wf):
     idx_table_df      = viewIdxTable()
     crafts_lab_entrys = idx_table_df.iloc[:, 2]
     FPIEs             = []
+    exact_mol_weights = []
 
     for entry in tqdm(crafts_lab_entrys, desc=f"<*> Calculating FPIEs . . ."):
 
         mass_list    = fetchMassList(searchAndFetch(entry))
         comparator   = Comparator(ms_data, mass_list, tol, weightFunction=wf)
         FPIEScore, _ = comparator.calculateFPIE()
+        allFragsDF   = searchAndFetch(entry)
 
         FPIEs.append(FPIEScore)
+        exact_mol_weights.append(allFragsDF.iloc[0, 2])
 
-    df = pd.concat([pd.DataFrame({"FPIE": np.round(FPIEs, 2)}), idx_table_df.iloc[:, 1:3]], axis=1)
+    df = pd.concat([pd.DataFrame({"FPIE": np.round(FPIEs, 2), "Exact_Mol_Wt": np.round(exact_mol_weights, 2)}), idx_table_df.iloc[:, 1:3]], axis=1)
     df = df.sort_values(by="FPIE", ascending=False)
 
     ScrollableTable(df, f"SWGDRUG SMILES w/ FPIEs >>> {os.path.splitext(os.path.basename(ms_data_path))[0]}").run()
