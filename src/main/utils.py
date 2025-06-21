@@ -36,7 +36,7 @@ def searchAndFetchByMass(mz: float) -> pd.DataFrame:
     # filteredRows = []
     rows = []
 
-    for smiles, craftsLabEntry in tqdm(idxTableDF.iloc[:, 1].items(), desc="<*> Fetching fragments . . ."):
+    for craftsLabEntry in tqdm(idxTableDF.iloc[:, 0], desc="<*> Fetching fragments . . ."):
 
         for row in searchAndFetch(craftsLabEntry).itertuples():
 
