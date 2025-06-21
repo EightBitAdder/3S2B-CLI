@@ -155,14 +155,14 @@ class Fragmentor():
 
                     frags      = Chem.FragmentOnBonds(self._mol, list(combo))
                     fragMols   = Chem.GetMolFrags(frags, asMols=True)
-                    fragSMILES = sorted(self._cleanMolSmiles(f) for f in fragMols if f is not None)
-                    key        = ",".join(fragSMILES)
+                    fragSMILES = sorted(self._cleanMolSmiles(frag) for frag in fragMols if frag is not None)
+                    key        = "::".join(fragSMILES)
 
                 except:
 
                     continue
 
-                if (not key or any(not s for s in fragSMILES)):
+                if (not key or any(not smiles for smiles in fragSMILES)):
 
                     continue
 
@@ -173,7 +173,7 @@ class Fragmentor():
         return seenResultants
 
 
-    '''
+    r'''
     def _cleanMolSmiles(self, mol: Chem.rdchem.Mol) -> str:
         """
         Cleans the SMILES output; nominally, after calls to:
@@ -187,7 +187,7 @@ class Fragmentor():
         mol: Chem.rdchem.Mol
             The molecule from which the SMILES output is generated.
 
-        
+
         returns:
         --------
 
@@ -198,7 +198,7 @@ class Fragmentor():
         cleanMolSmiles = re.sub(r"\(\[\d+\*\]\)|\[\d+\*\]|\*",
                                 "",
                                 Chem.MolToSmiles(mol))
-        
+
         return cleanMolSmiles
     '''
     def _cleanMolSmiles(self, mol: Chem.Mol) -> str:

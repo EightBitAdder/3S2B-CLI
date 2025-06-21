@@ -33,8 +33,7 @@ def searchAndFetchByMass(mz: float) -> pd.DataFrame:
 
     mz           = round(float(mz), 2)
     idxTableDF   = viewIdxTable()
-    # filteredRows = []
-    rows = []
+    rows         = []
 
     for craftsLabEntry in tqdm(idxTableDF.iloc[:, 0], desc="<*> Fetching fragments . . ."):
 
