@@ -3,7 +3,9 @@ resource/dartms/
 resource/eims/
 resource/examples
 src/3s2b.egg-info/
-src/3s2b.egg-info/
+src/comparator/__pycache__/
+src/comparator/weight_functions/__pycache__/
 src/db/__pycache__/
 src/file_readers/__pycache__/
+src/fragmentor/__pycache__/
 src/main/__pycache__/
