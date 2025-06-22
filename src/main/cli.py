@@ -1,7 +1,13 @@
-from main.fragmentor import Fragmentor
-from main.utils import fetchMassList, searchAndFetchByMass
-from db.utils import addEntryFromSmiles, searchAndFetch, viewIdxTable
-from main.comparator import (
+from fragmentor import (
+    Fragmentor,
+    fetchMassList
+)
+from db import (
+    addEntryFromSmiles,
+    searchAndFetch,
+    viewIdxTable
+)
+from comparator import (
     MassList,
     MSData,
     Comparator
@@ -176,10 +182,10 @@ def cli(ctx):
 @click.command()
 @click.argument("file_paths", nargs=2, type=click.Path(exists=True))
 @click.argument("tol", type=float)
-@click.option("--sr", default="MS-DATA", help="<*> MS-Data file reader")
-@click.option("--lr", default="MASS-LIST", help="<*> Mass-List file reader")
-@click.option("--dr", default=None, help="<*> MS-Data file and Mass-List file delimiter")
-@click.option("--wf", default=None, help="<*> Weight Function")
+@click.option("-sr", default="MS-DATA", help="<*> MS-Data file reader")
+@click.option("-lr", default="MASS-LIST", help="<*> Mass-List file reader")
+@click.option("-dr", default=None, help="<*> MS-Data file and Mass-List file delimiter")
+@click.option("-wf", default=None, help="<*> Weight Function")
 @click.option("--plot", is_flag=True, help="<*> Plot Annotated FPIE")
 def c(file_paths, tol, sr, lr, dr, wf, plot):
 
@@ -187,7 +193,7 @@ def c(file_paths, tol, sr, lr, dr, wf, plot):
 
     ms_data                 = MSData.fromFile(ms_data_path, delimiter=dr, fileReader=sr)
     mass_list               = MassList.fromFile(mass_list_path, delimiter=dr, fileReader=lr)
-    comparator              = Comparator(ms_data, mass_list, tol, weightFunction=wf)
+    comparator              = Comparator(ms_data, mass_list, tol=tol, weightFunction=wf)
     FPIEScore, plotMetaData = comparator.calculateFPIE()
 
     if (plot):
@@ -204,9 +210,9 @@ def c(file_paths, tol, sr, lr, dr, wf, plot):
 @click.command()
 @click.argument("ms_data_path", type=click.Path(exists=True))
 @click.argument("tol", type=float)
-@click.option("--sr", default="MS-DATA", help="<*> MS-Data file reader")
-@click.option("--dr", default=None, help="<*> MS-Data file and Mass-List file delimiter")
-@click.option("--wf", default=None, help="<*> Weight Function")
+@click.option("-sr", default="MS-DATA", help="<*> MS-Data file reader")
+@click.option("-dr", default=None, help="<*> MS-Data file and Mass-List file delimiter")
+@click.option("-wf", default=None, help="<*> Weight Function")
 def a(ms_data_path, tol, sr, dr, wf):
 
     ms_data           = MSData.fromFile(ms_data_path, delimiter=dr, fileReader=sr)
@@ -218,7 +224,7 @@ def a(ms_data_path, tol, sr, dr, wf):
     for entry in tqdm(crafts_lab_entrys, desc=f"<*> Calculating FPIEs . . ."):
 
         mass_list    = fetchMassList(searchAndFetch(entry))
-        comparator   = Comparator(ms_data, mass_list, tol, weightFunction=wf)
+        comparator   = Comparator(ms_data, mass_list, tol=tol, weightFunction=wf)
         FPIEScore, _ = comparator.calculateFPIE()
         allFragsDF   = searchAndFetch(entry)
 
@@ -247,7 +253,23 @@ def f(search_term):
 @click.argument("mz")
 def m(mz):
 
-    ScrollableTable(searchAndFetchByMass(mz), f"MFD Index Table >>> By mz").run()
+    mz           = round(float(mz), 2)
+    idxTableDF   = viewIdxTable()
+    rows         = []
+
+    for craftsLabEntry in tqdm(idxTableDF.iloc[:, 0], desc="<*> Fetching fragments . . ."):
+
+        for row in searchAndFetch(craftsLabEntry).itertuples(index=False):
+
+            Iso_Wts = list(map(float, row.Iso_Wts.split(", ")))
+            masses  = [row.Exact_Mol_Wt, *Iso_Wts]
+
+            if (mz in np.round(masses, 2)):
+
+                rows.append(row)
+
+    ScrollableTable(pd.DataFrame(rows).reset_index(drop=True),
+                    f"MFD Index Table >>> By mz").run()
 
 
 @click.command()

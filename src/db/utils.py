@@ -1,4 +1,4 @@
-from main.fragmentor import Fragmentor
+from fragmentor import Fragmentor
 import os
 import re
 import sqlite3

@@ -3,6 +3,7 @@ from .delimited_file_reader import DelimitedFileReader
 from .registry import registerFileReader
 import pandas as pd
 
+
 @registerFileReader("MASS-LIST")
 class MassListReader(DelimitedFileReader):
 

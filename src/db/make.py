@@ -17,7 +17,7 @@ in order to create the Molecular Fragment Database (MFD).
         May, 2025
 """
 
-from main.fragmentor import Fragmentor
+from fragmentor import Fragmentor
 import os
 import sqlite3
 from rdkit import Chem

@@ -44,13 +44,13 @@ After running the cli.bat script, five menu options will be displayed to the con
 
     The **c** command also boasts the following options (*Note: type 3s2b c --help in the console for more information . . .*):
 
-    - *--sr* selects the file reader to be used for the given mass-spectral data file. Currently, only the default **MS-DATA** file reader is available. Support for SDF files will be available soon.
+    - *-sr* selects the file reader to be used for the given mass-spectral data file. Currently, only the default **MS-DATA** file reader is available. Support for SDF files will be available soon.
     
-    - *--lr* selects the file reader to be used for the given mass-list data file. Currently, only the default **MASS-LIST** file reader is available.
+    - *-lr* selects the file reader to be used for the given mass-list data file. Currently, only the default **MASS-LIST** file reader is available.
     
-    - *--dr* specifies the delimiter used in both the mass-secptral and mass-list data files. If a delimiter is not specified, then the file reader will attempt to sniff the appropriate delimiter; otherwise, the file reader will default to using: *" \s+ "*.
+    - *-dr* specifies the delimiter used in both the mass-secptral and mass-list data files. If a delimiter is not specified, then the file reader will attempt to sniff the appropriate delimiter; otherwise, the file reader will default to using: *" \s+ "*.
     
-    - *--wf* specifies the weight function to be used in the FPIE calculation. Currently only two weight functions are supported: **CONSTANT** (default when the given mass-list data file is not annotated with multiplicities) and **EXPONENTIAL-DECAY** (default when the given mass-list data file is annotated with multiplicities).
+    - *-wf* specifies the weight function to be used in the FPIE calculation. Currently only two weight functions are supported: **CONSTANT** (default when the given mass-list data file is not annotated with multiplicities) and **EXPONENTIAL-DECAY** (default when the given mass-list data file is annotated with multiplicities).
     
     - *--plot* specifies whether an annoted FPIE stem-plot should/should not be generated for the given comparison.
 
@@ -58,11 +58,11 @@ After running the cli.bat script, five menu options will be displayed to the con
 
     The **a** command also boasts the following options (*Note: type 3s2b a --help in the console for more information . . .*):
 
-    - *--sr* selects the file reader to be used for the given mass-spectral data file. Currently, only the default **MS-DATA** file reader is available. Support for SDF files will be available soon.
+    - *-sr* selects the file reader to be used for the given mass-spectral data file. Currently, only the default **MS-DATA** file reader is available. Support for SDF files will be available soon.
     
-    - *--dr* specifies the delimiter used in both the mass-secptral and mass-list data files. If a delimiter is not specified, then the file reader will attempt to sniff the appropriate delimiter; otherwise, the file reader will default to using: *" \s+ "*.
+    - *-dr* specifies the delimiter used in both the mass-secptral and mass-list data files. If a delimiter is not specified, then the file reader will attempt to sniff the appropriate delimiter; otherwise, the file reader will default to using: *" \s+ "*.
     
-    - *--wf* specifies the weight function to be used in the FPIE calculation. Currently only two weight functions are supported: **CONSTANT** (default when the given mass-list data file is not annotated with multiplicities) and **EXPONENTIAL-DECAY** (default when the given mass-list data file is annotated with multiplicities).
+    - *-wf* specifies the weight function to be used in the FPIE calculation. Currently only two weight functions are supported: **CONSTANT** (default when the given mass-list data file is not annotated with multiplicities) and **EXPONENTIAL-DECAY** (default when the given mass-list data file is annotated with multiplicities).
 
 6. **Fragment**: Pressing **fr**, followed by a *SMILES* string (followed by **enter**) will display the Fragment Table of the associated *SMILES* string.
 
