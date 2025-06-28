@@ -1,6 +1,6 @@
 # 3S2B CLI
 
-Welcome to the 3S2B CLI. This is a command-line interface tool for the 3S2B algorithm and the MFD.
+Welcome to the 3S2B CLI. This is a command-line interface tool for the 3S2B algorithm and the MFD. Please visit C:\Users\BigRe\OneDrive\Desktop\CRAFTS Lab\MFMC to read our paper.
 
 ## Getting Started
 
