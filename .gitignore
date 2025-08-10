@@ -1,11 +1,40 @@
-resource/swgdrugdb.db
-resource/dartms/
-resource/eims/
-resource/examples
-src/3s2b.egg-info/
-src/comparator/__pycache__/
-src/comparator/weight_functions/__pycache__/
-src/db/__pycache__/
-src/file_readers/__pycache__/
-src/fragmentor/__pycache__/
-src/main/__pycache__/
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 3S2B specific
+*.db
+*.db-wal
+*.db-shm
+swgdrugdb.db*
+
+# Data files (too large for git)
+*.sdf
+*.SDF
+SWGDRUG*.sdf
+SWGDRUG*.SDF
+
+# Generated files
+*.png
+*.pdf
+results_*.csv
+fragments_*.csv
+
+# IDE
+.vscode/
+.idea/
+
+# OS specific
+.DS_Store
+Thumbs.db

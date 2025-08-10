@@ -1,33 +1,114 @@
-# 3S2B CLI
+# 3S2B CLI - Molecular Fragment Database Analysis Tool
 
-Welcome to the 3S2B CLI. This is a command-line interface tool for the 3S2B algorithm and the MFD. Please visit https://chemrxiv.org/engage/chemrxiv/article-details/685aa01d1a8f9bdab548c2f4 to read our paper.
+[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-## Getting Started
+A comprehensive command-line interface and Python library for Fragment Pattern Intensity Explained (FPIE) scoring and molecular fragment database analysis, implementing the 3S2B algorithm.
 
-To start using the tool, simply follow the steps listed below:
+## 📖 About
 
-### Step 1: Set-up
-*NOTE*: Python version 3.12.7 is required in order to use the 3S2B CLI.
+The 3S2B CLI provides tools for:
+- **Fragment Analysis**: Systematic molecular fragmentation with mass calculation
+- **FPIE Scoring**: Fragment Pattern Intensity Explained scoring against mass spectral data
+- **Database Management**: Molecular fragment database creation and querying
+- **Mass Spectrometry**: Peak matching and intensity analysis
 
-1. Clone the repository to your local machine:
-    ```bash
-    git clone https://github.com/EightBitAdder/3S2B-CLI.git
-    cd 3S2B-CLI
-    ```
+For detailed methodology, see our paper: [3S2B Algorithm](https://chemrxiv.org/engage/chemrxiv/article-details/685aa01d1a8f9bdab548c2f4)
 
-    Or else, simply download the repository as a .zip file onto your computer; making sure to extract the contents of the file before proceeding.
+## 🚀 Installation
 
-2. Run the setup.bat script in order to configure your environment on Windows:
-    ```bash
-    setup.bat
-    ```
+### Prerequisites
 
-    *(A .sh script for Linux and MacOS is actively being working on. Stay tuned...)*
+- Python 3.10 or higher
+- RDKit (for molecular handling)
+- IsoSpecPy (for isotope calculations)
 
-### Step 2: Use the Tool
-Run the cli.bat script in order to start using the tool.
+### Install from Source
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/EightBitAdder/3S2B-CLI.git
+   cd 3S2B-CLI
+   ```
+
+2. **Install the package:**
+   ```bash
+   pip install .
+   ```
+
+3. **Or install in development mode:**
+   ```bash
+   pip install -e ".[dev]"
+   ```
+
+### Install Dependencies
+
+If you encounter issues with RDKit installation:
+
 ```bash
-cli.bat
+# Using conda (recommended for RDKit)
+conda install -c conda-forge rdkit
+
+# Or using pip (may require additional setup)
+pip install rdkit
+```
+
+## 🎯 Quick Start
+
+### 1. Create Database (First Time Setup)
+
+```bash
+# Create database from SDF file
+3s2b make-db --sdf path/to/molecules.sdf
+
+# Or let it auto-detect SDF location
+export THREE_S_TWO_B_SDF_PATH="path/to/SWGDRUG313.SDF"
+3s2b make-db
+```
+
+### 2. Fragment Analysis
+
+```bash
+# Generate fragments from SMILES
+3s2b fragment "CCO" --max-mult 2
+
+# Save fragments to file
+3s2b fragment "c1ccccc1" --save benzene_fragments.csv
+```
+
+### 3. FPIE Scoring
+
+```bash
+# Compare MS data against fragment list
+3s2b compare spectrum.csv fragments.csv 0.1
+
+# Compare against entire database
+3s2b compare-all spectrum.csv 0.1 --top 20
+
+# With custom weight function and plotting
+3s2b compare data.txt masses.txt 0.05 \
+    --weight-function EXPONENTIAL-DECAY \
+    --plot --save-plot results.png
+```
+
+### 4. Database Operations
+
+```bash
+# View database index
+3s2b index --limit 50
+
+# Search by SMILES, name, or ID
+3s2b search "CCO"
+3s2b search "CL123"
+
+# Search by mass
+3s2b mass-search 100.0 --tolerance 0.1
+
+# Add molecule to database
+3s2b add "CC(=O)O" --name "acetic acid"
+
+# Database information
+3s2b db-info
 ```
 
 ## Using the Tool
