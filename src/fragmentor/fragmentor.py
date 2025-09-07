@@ -247,7 +247,7 @@ class Fragmentor():
 
                 if (prob > 0.01):
 
-                    isoMasses.append(mass)
+                    isoMasses.append(round(mass,5))
 
         except Exception:
 
@@ -294,7 +294,7 @@ class Fragmentor():
 
                         continue
 
-                    exactWt   = Descriptors.ExactMolWt(frag)
+                    exactWt   = round(Descriptors.ExactMolWt(frag),5)
                     isoMasses = ", ".join(map(str, self._fetchIsoMasses(frag)))
 
                     allFragsData.append([smiles, formula, exactWt, isoMasses, len(bondIdx)])
