@@ -75,7 +75,3 @@ After running the cli.bat script, five menu options will be displayed to the con
 6. **Fragment**: Pressing **fr**, followed by a *SMILES* string (followed by **enter**) will display the Fragment Table of the associated *SMILES* string.
 
 7. **Add**: Pressing **add**, followed by a *SMILES* string (followed by **enter**) inserts the given *SMILES* string into the MDF.
-
-## Additional Notes
-
-We are actively working on providing support for Linux and MacOS. Stay tuned for updates!
