@@ -86,7 +86,17 @@ def main():
     e_install()
     make_db()
 
+    if (os.name == "nt"):
+
+        activation_script = ".\\.venv\\Scripts\\activate.bat"
+
+    else:
+
+        activation_script = "source .venv/bin/activate"
+
     print("\n[SUCCESS] Setup complete!")
+    print("\nTo activate the Virtual Environment, run the following command:")
+    print(f"\t{activation_script}")
 
 
 if __name__ == "__main__":
