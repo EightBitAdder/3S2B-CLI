@@ -1,4 +1,4 @@
-# 3S2B CLI 
+# 3S2B CLI
 
 Welcome to the 3S2B CLI. This is a command-line interface tool for the 3S2B algorithm and the MFD. Please visit https://chemrxiv.org/engage/chemrxiv/article-details/685aa01d1a8f9bdab548c2f4 to read our paper.
 
@@ -17,18 +17,26 @@ To start using the tool, simply follow the steps listed below:
 
     Or else, simply download the repository as a .zip file onto your computer; making sure to extract the contents of the file before proceeding.
 
-2. Run the setup.bat script in order to configure your environment on Windows:
+2. Run the bootstrap.py script in order to configure the project environment:
     ```bash
-    setup.bat
+    python bootstrap.py
     ```
 
-    *(A .sh script for Linux and MacOS is actively being working on. Stay tuned...)*
+    and follow the on-screen instrcutions.
 
 ### Step 2: Use the Tool
-Run the cli.bat script in order to start using the tool.
+Simply type:
 ```bash
-cli.bat
+3s2b
 ```
+
+or
+
+```bash
+3s2b --help
+```
+
+into the command prompt where you will be greeted with a welcome message, as well as a list of all of the available commands.
 
 ## Using the Tool
 
