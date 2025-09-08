@@ -289,7 +289,9 @@ def fr(smiles, maxmult):
     fragmentor     = Fragmentor(maxMult=maxmult)
     fragmentor.mol = Chem.MolFromSmiles(smiles)
 
-    return ScrollableTable(fragmentor.fetchAllFragsData(), f"{smiles} Fragment Table").run()
+    return ScrollableTable(
+        fragmentor.fetchAllFragsData(), f"{smiles} Fragment Table"
+    ).run()
 
 
 @click.command()

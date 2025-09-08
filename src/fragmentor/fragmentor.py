@@ -5,6 +5,7 @@ import pandas as pd
 import IsoSpecPy as iso
 from rdkit import Chem
 from rdkit.Chem import rdMolDescriptors, Descriptors
+from tqdm import tqdm
 
 
 class Fragmentor():
@@ -92,7 +93,7 @@ class Fragmentor():
         return bondIdxs
 
 
-    def _fetchAllFrags(self) -> Dict[str, Tuple[List[Chem.Mol], Tuple[int, ...]]]:
+    def _fetchAllFrags(self) -> Generator[Tuple[Chem.Mol, Tuple[int, ...]], None, None]:
         """
         Fetches all of the fragments, as well as their multiplicities.
 
@@ -110,15 +111,19 @@ class Fragmentor():
             The fragments, as well as their multiplicities.
         """
 
-        seenResultants = {}
+        seenResultants = set()
 
         try:
 
-            seenResultants[self._cleanMolSmiles(self._mol)] = ([self._mol], tuple())
+            key = self._cleanMolSmiles(self._mol)
+
+            seenResultants.add(key)
+
+            yield self._mol, tuple()
 
         except Exception as e:
 
-            print(f"<*> Skipped fragment due to RDKit error >>> {e}")
+            print(f"<*> Skipped mol due to RDKit error >>> {e}")
 
 
         for bondIdx in self._fetchBondIdxs():
@@ -138,11 +143,15 @@ class Fragmentor():
 
                 continue
 
-            if (key not in seenResultants):
+            if (key in seenResultants):
 
-                seenResultants[key] = (fragMols, bondIdx)
+                continue
 
-        return seenResultants
+            seenResultants.add(key)
+
+            for frag in fragMols:
+
+                yield frag, bondIdx
 
 
     def _cleanMolSmiles(self, mol: Chem.Mol) -> str:
@@ -276,31 +285,28 @@ class Fragmentor():
         """
 
         allFragsData = []
-        resultants   = self._fetchAllFrags()
 
-        for fragMols, bondIdx in resultants.values():
+        for fragMols, bondIdx in self._fetchAllFrags():
 
-            for frag in fragMols:
+            try:
 
-                try:
+                smiles  = self._cleanMolSmiles(frag)
+                formula = self._cleanMolFormula(frag)
 
-                    smiles  = self._cleanMolSmiles(frag)
-                    formula = self._cleanMolFormula(frag)
-
-                    if (not smiles or not formula):
-
-                        continue
-
-                    exactWt   = round(Descriptors.ExactMolWt(frag),5)
-                    isoMasses = ", ".join(map(str, self._fetchIsoMasses(frag)))
-
-                    allFragsData.append([smiles, formula, exactWt, isoMasses, len(bondIdx)])
-
-                except Exception as e:
-
-                    print(f"<*> Skipped fragment due to RDKit error >>> {e}")
+                if (not smiles or not formula):
 
                     continue
+
+                exactWt   = round(Descriptors.ExactMolWt(frag),5)
+                isoMasses = ", ".join(map(str, self._fetchIsoMasses(frag)))
+
+                allFragsData.append([smiles, formula, exactWt, isoMasses, len(bondIdx)])
+
+            except Exception as e:
+
+                print(f"<*> Skipped fragment due to RDKit error >>> {e}")
+
+                continue
 
         return pd.DataFrame(
             allFragsData,
