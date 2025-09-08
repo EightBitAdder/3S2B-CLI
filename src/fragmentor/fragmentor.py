@@ -174,7 +174,6 @@ class Fragmentor():
         )
 
         return cleanMolSmiles
->>>>>>> c205fe5 (Update setup with bootstrap; remove smiles cache from Fragmentor)
     
 
     def _cleanMolFormula(self, mol: Chem.rdchem.Mol) -> str:

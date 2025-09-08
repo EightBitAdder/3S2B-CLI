@@ -4,6 +4,5 @@ matplotlib
 IsoSpecPy
 rdkit
 click
->>>>>>> c205fe5 (Update setup with bootstrap; remove smiles cache from Fragmentor)
 textual
 tqdm
