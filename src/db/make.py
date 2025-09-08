@@ -33,11 +33,14 @@ RDLogger.DisableLog('rdApp.*') # disable RDKit warning messages.
 ##########
 
 CURRENT_DIR     = os.path.dirname(os.path.abspath(__file__))
+RESOURCE_DIR    = os.path.abspath(
+    os.path.join(CURRENT_DIR, "..", "..", "resource")
+)
 DB_PATH         = os.path.abspath(
-    os.path.join(CURRENT_DIR, "..", "..", "resource", "swgdrugdb.db")
+    os.path.join(RESOURCE_DIR, "swgdrugdb.db")
 )
 SWGDRUG313_PATH = os.path.abspath(
-    os.path.join(CURRENT_DIR, "..", "..", "resource", "SWGDRUG313.SDF")
+    os.path.join(RESOURCE_DIR, "SWGDRUG313.SDF")
 )
 
 ##########

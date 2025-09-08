@@ -1,18 +1,23 @@
 from setuptools import setup, find_packages
 import os
+from pathlib import Path
 
 
 def install_dependencies():
 
-	req_path = os.path.join(os.path.dirname(__file__), "requirements.txt")
+	req_path = Path(__file__).parent / "requirements.txt"
 
-	if (not os.path.exists(req_path)):
+	if (not req_path.exists()):
 
 		return[]
 
-	with open(req_path, "r") as file:
+	with req_path.open("r") as file:
 
-		return [line.strip() for line in file if line.strip() and not line.startswith("#")]
+		return [
+			line.strip()
+			for line in file
+			if line.strip() and not line.startswith("#")
+		]
 
 
 setup(

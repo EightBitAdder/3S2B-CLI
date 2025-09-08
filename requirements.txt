@@ -1,10 +1,9 @@
-numpy>=2.1.2
-pandas>=2.2.3
-matplotlib>=3.9.2
-IsoSpecPy>=2.2.2
-rdkit>=2024.3.5
-plotext>=5.3.2 # to be used later
-click>=8.1.8
-rich
+numpy
+pandas
+matplotlib
+IsoSpecPy
+rdkit
+click
+>>>>>>> c205fe5 (Update setup with bootstrap; remove smiles cache from Fragmentor)
 textual
 tqdm

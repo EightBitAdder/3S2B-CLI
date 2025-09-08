@@ -26,7 +26,6 @@ class Fragmentor():
         
         self.maxMult                      = maxMult
         self._mol                         = None
-        self._smilesCache: Dict[str, str] = {}
 
 
     @property
@@ -167,16 +166,15 @@ class Fragmentor():
             The cleaned SMILES output.
         """
 
-        smiles = Chem.MolToSmiles(mol, canonical=True)
+        smiles         = Chem.MolToSmiles(mol, canonical=True)
+        cleanMolSmiles = re.sub(
+            r"\(\[\d+\*\]\)|\[\d+\*\]|\*",
+            "",
+            smiles
+        )
 
-        if (smiles not in self._smilesCache):
-
-            cleanMolSmiles            = re.sub(r"\(\[\d+\*\]\)|\[\d+\*\]|\*",
-                                               "",
-                                               smiles)
-            self._smilesCache[smiles] = cleanMolSmiles
-
-        return self._smilesCache[smiles]
+        return cleanMolSmiles
+>>>>>>> c205fe5 (Update setup with bootstrap; remove smiles cache from Fragmentor)
     
 
     def _cleanMolFormula(self, mol: Chem.rdchem.Mol) -> str:
