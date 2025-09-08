@@ -286,7 +286,7 @@ class Fragmentor():
 
         allFragsData = []
 
-        for fragMols, bondIdx in self._fetchAllFrags():
+        for frag, bondIdx in self._fetchAllFrags():
 
             try:
 
