@@ -104,11 +104,11 @@ class Fragmentor():
         None
 
 
-        returns:
-        --------
+        yields:
+        -------
 
-        fragsWithMult: list[Tuple[Chem.rdchem.Mol, int]]
-            The fragments, as well as their multiplicities.
+        frag, bondIdx: Tuple[rdkit.Chem.rdchem.Mol, Tuple[int, ...]]
+            A fragment, as well as its multiplicity.
         """
 
         seenResultants = set()
