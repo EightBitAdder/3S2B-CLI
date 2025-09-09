@@ -25,7 +25,13 @@ To start using the tool, simply follow the steps listed below:
     and follow the on-screen instrcutions.
 
 ### Step 2: Use the Tool
-Simply type:
+
+Activate the Virtual Environment by running the following command:
+```bash
+source .venv/bin/activate
+```
+
+and then simply type:
 ```bash
 3s2b
 ```
@@ -38,9 +44,14 @@ or
 
 into the command prompt where you will be greeted with a welcome message, as well as a list of all of the available commands.
 
-## Using the Tool
+To exit the Virtual Environment, simply type:
+```bash
+deactivate
+``` 
 
-After running the cli.bat script, five menu options will be displayed to the console. They are as follows (*Note: type 3s2b " command " --help in the console for more information . . .*):
+## Commands
+
+There are seven commands that can be executed using the 3s2b cli. They are as follows (*Note: type 3s2b " command " --help in the console for more information . . .*):
 
 1. **View Index Table**: Pressing **i** (followed by **enter**) will display the MFD Index Table. This is the *master table* which pairs each of the SWGDrug molecules with their associated Fragment Table.
 
